@@ -1,0 +1,34 @@
+{
+    "vertex": "eagler_shaders/base",
+    "fragment": "eagler_shaders/vanilla_enhanced_medium",
+    "attributes": [ "Position" ],
+    "samplers": [
+        { "name": "DiffuseSampler" }
+    ],
+    "uniforms": [
+        { "name": "ProjMat", "type": "matrix4x4", "count": 16, "values": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
+        { "name": "OutSize", "type": "float", "count": 2, "values": [ 1.0, 1.0 ] },
+        { "name": "InSize", "type": "float", "count": 2, "values": [ 1.0, 1.0 ] },
+        { "name": "ScreenSize", "type": "float", "count": 2, "values": [ 1.0, 1.0 ] },
+        { "name": "Time", "type": "float", "count": 1, "values": [ 0.0 ] },
+        { "name": "DayTime", "type": "float", "count": 1, "values": [ 0.5 ] },
+        { "name": "QUALITY_LEVEL", "type": "int", "count": 1, "values": [ 1 ] },
+        { "name": "ENABLE_FOG", "type": "bool", "count": 1, "values": [ 1 ] },
+        { "name": "ENABLE_COLOR_GRADING", "type": "bool", "count": 1, "values": [ 1 ] },
+        { "name": "ENABLE_TONEMAP", "type": "bool", "count": 1, "values": [ 1 ] },
+        { "name": "ENABLE_VIGNETTE", "type": "bool", "count": 1, "values": [ 1 ] },
+        { "name": "FogColor", "type": "float", "count": 3, "values": [ 0.6, 0.7, 0.85 ] },
+        { "name": "FogDensity", "type": "float", "count": 1, "values": [ 0.015 ] },
+        { "name": "FogStart", "type": "float", "count": 1, "values": [ 0.0 ] },
+        { "name": "FogEnd", "type": "float", "count": 1, "values": [ 1.0 ] },
+        { "name": "Lift", "type": "float", "count": 3, "values": [ 0.0, 0.0, 0.0 ] },
+        { "name": "Gamma", "type": "float", "count": 3, "values": [ 1.0, 1.0, 1.0 ] },
+        { "name": "Gain", "type": "float", "count": 3, "values": [ 1.0, 1.0, 1.0 ] },
+        { "name": "Saturation", "type": "float", "count": 1, "values": [ 1.08 ] },
+        { "name": "Contrast", "type": "float", "count": 1, "values": [ 1.05 ] },
+        { "name": "Brightness", "type": "float", "count": 1, "values": [ 0.02 ] },
+        { "name": "Temperature", "type": "float", "count": 1, "values": [ 0.15 ] },
+        { "name": "VignetteIntensity", "type": "float", "count": 1, "values": [ 0.2 ] },
+        { "name": "VignetteSmoothness", "type": "float", "count": 1, "values": [ 0.4 ] }
+    ]
+}

@@ -1,0 +1,27 @@
+modLoader="javafml"
+loaderVersion="[36,)"
+license="Apache-2.0"
+issueTrackerURL="https://github.com/eaglercraft/eagler-shaders/issues"
+
+[[mods]]
+modId="eagler_shaders"
+version="1.0.0"
+displayName="Eaglercraft Shader Collection"
+description="A lightweight shader collection for Eaglercraft with light and dark presets optimised for low-end devices."
+authors="Eaglercraft Shaders Team"
+credits="Based on Eaglercraft's shader architecture"
+displayURL="https://github.com/eaglercraft/eagler-shaders"
+
+[[dependencies.eagler_shaders]]
+modId="forge"
+mandatory=true
+versionRange="[36,)"
+ordering="NONE"
+side="CLIENT"
+
+[[dependencies.eagler_shaders]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.16.5,1.17)"
+ordering="NONE"
+side="CLIENT"
