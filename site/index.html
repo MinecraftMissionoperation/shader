@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Eaglercraft Shader Collection - Lightweight shaders for low-end WebGL devices">
+  <title>Eaglercraft Shader Collection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --bg-elevated: #11111a;
+      --fg: #e8e8f0;
+      --muted: #6b6b7a;
+      --accent: #00d4aa;
+      --accent-dim: #00d4aa40;
+      --warm: #ffb86b;
+      --cool: #6bb8ff;
+      --dark: #1a1a2e;
+      --card: #14141f;
+      --border: #2a2a3a;
+      --glow: #00d4aa;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Canvas background */
+    #bg-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+      opacity: 0.6;
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(20px);
+      background: rgba(10, 10, 15, 0.8);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--fg);
+      text-decoration: none;
+    }
+
+    .nav-brand svg { width: 32px; height: 32px; }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color 0.2s;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px; left: 0;
+      width: 0; height: 2px;
+      background: var(--accent);
+      transition: width 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--fg); }
+    .nav-links a:hover::after { width: 100%; }
+
+    .nav-cta {
+      background: var(--accent);
+      color: var(--bg);
+      padding: 0.625rem 1.25rem;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.875rem;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px var(--accent-dim);
+    }
+
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 6rem 2rem 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--accent);
+      width: fit-content;
+      margin-bottom: 2rem;
+      animation: fadeUp 0.6s ease-out;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 8px; height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.9); }
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.6s ease-out 0.1s both;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--warm) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--muted);
+      max-width: 60ch;
+      margin-bottom: 2.5rem;
+      animation: fadeUp 0.6s ease-out 0.2s both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      animation: fadeUp 0.6s ease-out 0.3s both;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1.75rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px var(--accent-dim);
+    }
+
+    .btn-secondary {
+      background: var(--card);
+      color: var(--fg);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-github {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-github:hover {
+      color: var(--fg);
+      border-color: var(--fg);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Stats bar */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1.5rem;
+      padding: 3rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat {
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--fg) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 0.25rem;
+    }
+
+    /* Sections */
+    section {
+      padding: 5rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .section-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 1rem;
+    }
+
+    .section-header h2 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      color: var(--fg);
+    }
+
+    /* Presets Grid */
+    .presets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .preset-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .preset-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: var(--preset-color);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s;
+    }
+
+    .preset-card:hover::before { transform: scaleX(1); }
+    .preset-card:hover {
+      border-color: var(--preset-color);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+
+    .preset-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      background: var(--preset-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      opacity: 0.2;
+    }
+
+    .preset-card h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .preset-card .category {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--preset-color);
+      margin-bottom: 1rem;
+      display: inline-block;
+    }
+
+    .preset-card p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .preset-qualities {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .quality-badge {
+      padding: 0.375rem 0.75rem;
+      border-radius: 100px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .quality-badge.low { border-color: #4ade80; color: #4ade80; }
+    .quality-badge.medium { border-color: #fbbf24; color: #fbbf24; }
+    .quality-badge.high { border-color: #f87171; color: #f87171; }
+
+    /* Code blocks */
+    .code-block {
+      background: #0d0d14;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 1.5rem 0;
+      position: relative;
+    }
+
+    .code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: #14141f;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .code-header .lang { text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .copy-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover { color: var(--accent); background: var(--accent-dim); }
+
+    .copy-btn.copied { color: var(--accent); }
+
+    pre {
+      padding: 1.5rem;
+      overflow-x: auto;
+      font-size: 0.8rem;
+      line-height: 1.7;
+    }
+
+    code { color: #e8e8f0; }
+
+    .token.comment { color: #6b6b7a; }
+    .token.keyword { color: #c792ea; }
+    .token.string { color: #ecc48d; }
+    .token.function { color: #82aaff; }
+    .token.number { color: #f78c6c; }
+    .token.operator { color: #89ddff; }
+    .token.punctuation { color: #89ddff; }
+    .token.class-name { color: #ffcb6b; }
+
+    /* Features */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .feature {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s;
+    }
+
+    .feature:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+    .feature-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: var(--accent-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      color: var(--accent);
+    }
+
+    .feature h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+    .feature p { color: var(--muted); font-size: 0.9rem; }
+
+    /* Performance */
+    .perf-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .perf-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .perf-card h4 { font-size: 0.9rem; margin-bottom: 0.75rem; color: var(--accent); }
+    .perf-card .preset { font-weight: 600; margin-bottom: 0.5rem; }
+    .perf-card .metrics { display: flex; gap: 1rem; font-size: 0.8rem; color: var(--muted); }
+
+    /* Footer */
+    footer {
+      padding: 3rem 2rem;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* Scroll reveal */
+    .reveal { opacity: 0; transform: translateY(30px); transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      nav { padding: 1rem; }
+      .nav-links { display: none; }
+      .hero { padding: 5rem 1rem 3rem; }
+      section { padding: 3rem 1rem; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+
+  <nav>
+    <a href="#" class="nav-brand">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="32" height="32" rx="8" fill="currentColor" opacity="0.15"/>
+        <path d="M8 12h16M8 16h12M8 20h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      Eagler Shaders
+    </a>
+    <ul class="nav-links">
+      <li><a href="#presets">Presets</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#performance">Performance</a></li>
+      <li><a href="#install">Install</a></li>
+    </ul>
+    <a href="https://github.com/NT9712/eagler-shaders" class="btn btn-github" target="_blank">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+      GitHub
+    </a>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="hero-badge">
+        <span>Version 1.0.0</span>
+      </div>
+      <h1>Shaders that <span>don't kill your FPS</span></h1>
+      <p>A lightweight, visually distinctive shader collection for Eaglercraft with six presets across three quality tiers—built for integrated GPUs, Chromebooks, and ancient laptops.</p>
+      <div class="hero-actions">
+        <a href="#install" class="btn btn-primary">Get Started</a>
+        <a href="https://github.com/NT9712/eagler-shaders" class="btn btn-secondary" target="_blank">View on GitHub</a>
+      </div>
+    </section>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value">6</div>
+        <div class="stat-label">Presets</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">15</div>
+        <div class="stat-label">Shader Programs</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">3</div>
+        <div class="stat-label">Quality Tiers</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value"><2%</div>
+        <div class="stat-label">FPS Overhead (LOW)</div>
+      </div>
+    </div>
+
+    <section id="presets">
+      <div class="section-header reveal">
+        <span class="section-tag">Presets</span>
+        <h2>Pick your vibe</h2>
+      </div>
+
+      <div class="presets-grid">
+        <!-- Vanilla Enhanced -->
+        <article class="preset-card reveal" style="--preset-color: #4ade80;">
+          <div class="preset-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+          <span class="category">Light</span>
+          <h3>Vanilla Enhanced</h3>
+          <p>The default. Better color balance, warmer sunlight, lightweight fog, improved sky—barely any overhead.</p>
+          <div class="preset-qualities">
+            <span class="quality-badge low">LOW</span>
+            <span class="quality-badge medium">MEDIUM</span>
+            <span class="quality-badge high">HIGH</span>
+          </div>
+        </article>
+
+        <!-- Bright -->
+        <article class="preset-card reveal" style="--preset-color: #fbbf24;">
+          <div class="preset-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          </div>
+          <span class="category">Light</span>
+          <h3>Bright</h3>
+          <p>Brighter lighting, clearer atmosphere, more vibrant colors. No expensive bloom—just smart color grading.</p>
+          <div class="preset-qualities">
+            <span class="quality-badge low">LOW</span>
+            <span class="quality-badge medium">MEDIUM</span>
+            <span class="quality-badge high">HIGH</span>
+          </div>
+        </article>
+
+        <!-- Soft -->
+        <article class="preset-card reveal" style="--preset-color: #a78bfa;">
+          <div class="preset-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+          </div>
+          <span class="category">Light</span>
+          <h3>Soft</h3>
+          <p>Gentle transitions, reduced harsh lighting, subtle atmosphere. Lower contrast, lifted shadows.</p>
+          <div class="preset-qualities">
+            <span class="quality-badge low">LOW</span>
+            <span class="quality-badge medium">MEDIUM</span>
+          </div>
+        </article>
+
+        <!-- Nightfall -->
+        <article class="preset-card reveal" style="--preset-color: #60a5fa;">
+          <div class="preset-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </div>
+          <span class="category">Dark</span>
+          <h3>Nightfall</h3>
+          <p>Darker ambient, increased contrast, atmospheric fog, nighttime mood. Optional subtle colored lighting.</p>
+          <div class="preset-qualities">
+            <span class="quality-badge low">LOW</span>
+            <span class="quality-badge medium">MEDIUM</span>
+            <span class="quality-badge high">HIGH</span>
+          </div>
+        </article>
+
+        <!-- Noir -->
+        <article class="preset-card reveal" style="--preset-color: #f472b6;">
+          <div class="preset-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+          </div>
+          <span class="category">Dark</span>
+          <h3>Noir</h3>
+          <p>High contrast, near-monochrome, crushed shadows. Strong visual identity through cheap color transforms.</p>
+          <div class="preset-qualities">
+            <span class="quality-badge low">LOW</span>
+            <span class="quality-badge medium">MEDIUM</span>
+          </div>
+        </article>
+
+        <!-- Abyss -->
+        <article class="preset-card reveal" style="--preset-color: #22d3ee;">
+          <div class="preset-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12c0 1.2-2 4-6 4-4 0-6-2.8-6-4"/><path d="M3 12c0-1.2 2-4 6-4 4 0 6 2.8 6 4"/></svg>
+          </div>
+          <span class="category">Dark</span>
+          <h3>Abyss</h3>
+          <p>Deep shadows, cool/dark color grading, heavy distance fog. No volumetrics—just exponential fog.</p>
+          <div class="preset-qualities">
+            <span class="quality-badge low">LOW</span>
+            <span class="quality-badge medium">MEDIUM</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="section-header reveal">
+        <span class="section-tag">Features</span>
+        <h2>Built different</h2>
+      </div>
+
+      <div class="features-grid">
+        <article class="feature reveal">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <h3>Aggressive LOW mode</h3>
+          <p>Fast sRGB approximation, no tonemapping, no vignette, no dithering, linear fog. Targets vanilla FPS on Intel UHD / ancient Chromebooks.</p>
+        </article>
+
+        <article class="feature reveal">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <h3>Capability detection</h3>
+          <p>Auto-detects WebGL2, uniform limits, derivative support, draw buffers. Gracefully degrades or disables features.</p>
+        </article>
+
+        <article class="feature reveal">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3>Safe fallbacks</h3>
+          <p>Shader compilation failure? Missing uniform? Unsupported extension? Falls back to vanilla instantly—no renderer crash.</p>
+        </article>
+
+        <article class="feature reveal">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+          </div>
+          <h3>One-step integration</h3>
+          <p><code>EaglercraftShaderIntegration.install(renderer)</code> — registers presets, compiles shaders, selects defaults, handles reloads.</p>
+        </article>
+
+        <article class="feature reveal">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 16 17 22 11"/><line x1="18" y1="6" x2="18" y2="6"/></svg>
+          </div>
+          <h3>Shared GLSL utilities</h3>
+          <p>Color grading (lift/gamma/gain), fog, tonemapping (Reinhard/Filmic), vignette, dithering, sky color—reused across all presets.</p>
+        </article>
+
+        <article class="feature reveal">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </div>
+          <h3>Time-aware</h3>
+          <p>DayTime uniform drives dynamic sky colors, temperature shifts, fog density—sunrise/sunset actually look different.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="performance">
+      <div class="section-header reveal">
+        <span class="section-tag">Performance</span>
+        <h2>Numbers that matter</h2>
+      </div>
+
+      <div class="perf-grid">
+        <article class="perf-card reveal">
+          <h4>Vanilla Enhanced</h4>
+          <div class="preset">LOW</div>
+          <div class="metrics">
+            <span>~1-2% overhead</span>
+            <span>No tonemap</span>
+            <span>Fast sRGB</span>
+          </div>
+        </article>
+        <article class="perf-card reveal">
+          <h4>Vanilla Enhanced</h4>
+          <div class="preset">MEDIUM</div>
+          <div class="metrics">
+            <span>~3-5% overhead</span>
+            <span>Filmic TM</span>
+            <span>Dynamic sky</span>
+          </div>
+        </article>
+        <article class="perf-card reveal">
+          <h4>Vanilla Enhanced</h4>
+          <div class="preset">HIGH</div>
+          <div class="metrics">
+            <span>~5-8% overhead</span>
+            <span>+Dithering</span>
+            <span>Exp² fog</span>
+          </div>
+        </article>
+        <article class="perf-card reveal">
+          <h4>Nightfall</h4>
+          <div class="preset">LOW</div>
+          <div class="metrics">
+            <span>~2-3% overhead</span>
+            <span>Heavy fog</span>
+            <span>Vignette on</span>
+          </div>
+        </article>
+        <article class="perf-card reveal">
+          <h4>Noir</h4>
+          <div class="preset">LOW</div>
+          <div class="metrics">
+            <span>~1-2% overhead</span>
+            <span>Monochrome</span>
+            <span>High contrast</span>
+          </div>
+        </article>
+        <article class="perf-card reveal">
+          <h4>Abyss</h4>
+          <div class="preset">LOW</div>
+          <div class="metrics">
+            <span>~2-4% overhead</span>
+            <span>Exp² fog</span>
+            <span>Blue tint</span>
+          </div>
+        </article>
+      </div>
+
+      <div style="margin-top: 3rem; padding: 2rem; background: var(--card); border: 1px solid var(--border); border-radius: 16px;">
+        <h3 style="margin-bottom: 1rem;">What LOW mode disables</h3>
+        <ul style="columns: 2; list-style: none; color: var(--muted); font-size: 0.9rem; line-height: 2;">
+          <li>✗ Tonemapping (Reinhard only if forced)</li>
+          <li>✗ Vignette effect</li>
+          <li>✗ Blue noise dithering</li>
+          <li>✗ Dynamic sky color calculations</li>
+          <li>✗ Exponential² fog (uses linear)</li>
+          <li>✗ Time-based temperature shifts</li>
+          <li>✗ Full sRGB/linear conversion</li>
+          <li>✗ Lift/Gamma/Gain color wheels</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="install">
+      <div class="section-header reveal">
+        <span class="section-tag">Installation</span>
+        <h2>Two steps. That's it.</h2>
+      </div>
+
+      <div class="code-block reveal">
+        <div class="code-header"><span class="lang">gradle.kts</span><button class="copy-btn" data-target="gradle">Copy</button></div>
+        <pre><code class="language-kotlin">repositories {
+    mavenCentral()
+    maven { url = uri("https://eaglercraft-teavm-fork.github.io/maven/") }
+}
+
+dependencies {
+    implementation("com.eaglercraft.shaders:eagler-shaders:1.0.0")
+}</code></pre>
+      </div>
+
+      <div class="code-block reveal">
+        <div class="code-header"><span class="lang">java</span><button class="copy-btn" data-target="java">Copy</button></div>
+        <pre><code class="language-java">import com.eaglercraft.shaders.EaglercraftShaderIntegration;
+import net.minecraft.client.renderer.GameRenderer;
+
+// Call once during client startup, after GameRenderer exists
+EaglercraftShaderIntegration.install(gameRenderer);
+
+// Later: switch presets, change quality, toggle
+ShaderCollection.enable("nightfall");
+ShaderCollection.setQuality(ShaderQuality.MEDIUM);
+ShaderCollection.toggleShaders();</code></pre>
+      </div>
+
+      <div class="code-block reveal">
+        <div class="code-header"><span class="lang">java</span><button class="copy-btn" data-target="hook">Copy</button></div>
+        <pre><code class="language-java">// In GameRenderer.updateCameraAndRender, replace vanilla shader rendering:
+if (GLX.usePostProcess) {
+    mc.worldRenderer.renderEntityOutlineFramebuffer();
+    // Replace vanilla shader block with:
+    EaglercraftShaderIntegration.renderShaders(partialTicks, this.useShader);
+    mc.getFramebuffer().bindFramebuffer(true);
+}</code></pre>
+      </div>
+
+      <p style="text-align: center; color: var(--muted); margin-top: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+        The mod also auto-initializes via <code>FMLClientSetupEvent</code> if you just drop the JAR in <code>mods/</code>.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <p>Eaglercraft Shader Collection • Apache 2.0 • <a href="https://github.com/NT9712/eagler-shaders" target="_blank">GitHub</a> • Built for <a href="https://eaglercraft.com" target="_blank">Eaglercraft</a></p>
+  </footer>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://esm.sh/three@0.165.0",
+      "three/addons/": "https://esm.sh/three@0.165.0/addons/"
+    }
+  }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // Scene setup
+    const canvas = document.getElementById('bg-canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.z = 30;
+
+    const controls = new OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.enablePan = false;
+    controls.enableZoom = false;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.3;
+    controls.dampingFactor = 0.05;
+
+    // Shader particles
+    const particleCount = 800;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+    const sizes = new Float32Array(particleCount);
+    const velocities = new Float32Array(particleCount * 3);
+
+    const palette = [
+      new THREE.Color(0x00d4aa), // accent
+      new THREE.Color(0xffb86b), // warm
+      new THREE.Color(0x6bb8ff), // cool
+      new THREE.Color(0xa78bfa), // purple
+    ];
+
+    for (let i = 0; i < particleCount; i++) {
+      const radius = 10 + Math.random() * 15;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+
+      positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+      positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+      positions[i * 3 + 2] = radius * Math.cos(phi);
+
+      const color = palette[Math.floor(Math.random() * palette.length)];
+      colors[i * 3] = color.r;
+      colors[i * 3 + 1] = color.g;
+      colors[i * 3 + 2] = color.b;
+
+      sizes[i] = 0.5 + Math.random() * 1.5;
+
+      velocities[i * 3] = (Math.random() - 0.5) * 0.002;
+      velocities[i * 3 + 1] = (Math.random() - 0.5) * 0.002;
+      velocities[i * 3 + 2] = (Math.random() - 0.5) * 0.002;
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+    const material = new THREE.PointsMaterial({
+      size: 1,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.8,
+      sizeAttenuation: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+
+    const particles = new THREE.Points(geometry, material);
+    scene.add(particles);
+
+    // Subtle ambient light
+    const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambient);
+
+    // Animation
+    let time = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+
+      time += 0.001;
+
+      const posAttr = geometry.attributes.position;
+      const sizeAttr = geometry.attributes.size;
+
+      for (let i = 0; i < particleCount; i++) {
+        posAttr.array[i * 3] += velocities[i * 3];
+        posAttr.array[i * 3 + 1] += velocities[i * 3 + 1];
+        posAttr.array[i * 3 + 2] += velocities[i * 3 + 2];
+
+        // Boundary wrap
+        const x = posAttr.array[i * 3];
+        const y = posAttr.array[i * 3 + 1];
+        const z = posAttr.array[i * 3 + 2];
+        const dist = Math.sqrt(x * x + y * y + z * z);
+
+        if (dist > 30) {
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.acos(2 * Math.random() - 1);
+          const radius = 25 + Math.random() * 5;
+          posAttr.array[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+          posAttr.array[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+          posAttr.array[i * 3 + 2] = radius * Math.cos(phi);
+        }
+
+        // Pulsing size
+        sizeAttr.array[i] = (0.5 + Math.sin(time * 2 + i) * 0.5) * sizes[i];
+      }
+
+      posAttr.needsUpdate = true;
+      sizeAttr.needsUpdate = true;
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Copy buttons
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.target;
+        const codeBlock = document.querySelector(`.code-block [data-target="${targetId}"]`);
+        const pre = btn.closest('.code-block').querySelector('pre');
+        const text = pre.innerText;
+
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+    });
+
+    // Parallax hero on scroll
+    window.addEventListener('scroll', () => {
+      const scrolled = window.scrollY;
+      canvas.style.transform = `translateY(${scrolled * 0.3}px)`;
+    });
+  </script>
+</body>
+</html>
