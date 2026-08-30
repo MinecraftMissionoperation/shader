@@ -10,18 +10,26 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0a0a0f;
-      --bg-elevated: #11111a;
-      --fg: #e8e8f0;
-      --muted: #6b6b7a;
-      --accent: #00d4aa;
-      --accent-dim: #00d4aa40;
-      --warm: #ffb86b;
-      --cool: #6bb8ff;
-      --dark: #1a1a2e;
-      --card: #14141f;
-      --border: #2a2a3a;
-      --glow: #00d4aa;
+      --bg: #050507;
+      --bg-deep: #030304;
+      --fg: #d8d8e0;
+      --fg-dim: #7a7a8a;
+      --muted: #4a4a5a;
+      --accent: #00cc99;
+      --accent-glow: #00cc9940;
+      --warm: #ff9f43;
+      --cool: #4da3ff;
+      --card: #0d0d12;
+      --card-hover: #14141c;
+      --border: #1e1e2a;
+      --border-bright: #2a2a3a;
+      --voxel-grass: #5dab3d;
+      --voxel-dirt: #8b6b42;
+      --voxel-stone: #7d7d7d;
+      --voxel-sand: #e8d8a8;
+      --voxel-water: #3d8fd8;
+      --voxel-leaves: #3a7d2e;
+      --voxel-log: #5d4028;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -34,25 +42,42 @@
       }
     }
 
+    html { scroll-behavior: smooth; }
+
     body {
       font-family: 'Space Grotesk', sans-serif;
       background: var(--bg);
       color: var(--fg);
       min-height: 100vh;
       overflow-x: hidden;
-      line-height: 1.6;
+      line-height: 1.65;
     }
 
     .mono { font-family: 'JetBrains Mono', monospace; }
 
-    /* Canvas background */
-    #bg-canvas {
+    /* Voxel background canvas */
+    #voxel-canvas {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
       z-index: -1;
-      opacity: 0.6;
+      opacity: 1;
     }
+
+    /* Skip link for accessibility */
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 1rem;
+      background: var(--accent);
+      color: var(--bg);
+      padding: 0.75rem 1.25rem;
+      border-radius: 6px;
+      font-weight: 700;
+      z-index: 1000;
+      text-decoration: none;
+    }
+    .skip-link:focus { top: 1rem; }
 
     /* Navigation */
     nav {
@@ -63,72 +88,54 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      backdrop-filter: blur(20px);
-      background: rgba(10, 10, 15, 0.8);
+      background: linear-gradient(180deg, rgba(5,5,7,0.95) 0%, rgba(5,5,7,0) 100%);
       border-bottom: 1px solid var(--border);
     }
 
     .nav-brand {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.625rem;
       font-weight: 700;
-      font-size: 1.25rem;
+      font-size: 1.125rem;
       color: var(--fg);
       text-decoration: none;
+      letter-spacing: -0.02em;
     }
 
-    .nav-brand svg { width: 32px; height: 32px; }
+    .nav-brand svg { width: 28px; height: 28px; }
 
     .nav-links {
       display: flex;
-      gap: 2rem;
+      gap: 0.5rem;
       list-style: none;
     }
 
     .nav-links a {
-      color: var(--muted);
+      color: var(--fg-dim);
       text-decoration: none;
-      font-size: 0.875rem;
+      font-size: 0.8125rem;
       font-weight: 500;
-      transition: color 0.2s;
-      position: relative;
-    }
-
-    .nav-links a::after {
-      content: '';
-      position: absolute;
-      bottom: -4px; left: 0;
-      width: 0; height: 2px;
-      background: var(--accent);
-      transition: width 0.2s;
-    }
-
-    .nav-links a:hover { color: var(--fg); }
-    .nav-links a:hover::after { width: 100%; }
-
-    .nav-cta {
-      background: var(--accent);
-      color: var(--bg);
-      padding: 0.625rem 1.25rem;
+      padding: 0.5rem 0.875rem;
       border-radius: 6px;
-      font-weight: 700;
-      font-size: 0.875rem;
-      text-decoration: none;
-      transition: transform 0.15s, box-shadow 0.15s;
+      transition: all 0.15s;
     }
 
-    .nav-cta:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 24px var(--accent-dim);
+    .nav-links a:hover {
+      color: var(--fg);
+      background: var(--card-hover);
     }
 
-    /* Hero */
+    .nav-links a.active {
+      color: var(--accent);
+      background: var(--accent-glow);
+    }
+
+    /* Hero - full viewport */
     .hero {
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
       padding: 6rem 2rem 4rem;
       max-width: 1200px;
       margin: 0 auto;
@@ -143,139 +150,137 @@
       border: 1px solid var(--border);
       padding: 0.5rem 1rem;
       border-radius: 100px;
-      font-size: 0.75rem;
-      font-weight: 500;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
       color: var(--accent);
       width: fit-content;
-      margin-bottom: 2rem;
-      animation: fadeUp 0.6s ease-out;
+      justify-self: start;
     }
 
     .hero-badge::before {
       content: '';
-      width: 8px; height: 8px;
+      width: 6px; height: 6px;
       background: var(--accent);
       border-radius: 50%;
-      animation: pulse 2s infinite;
+      animation: blink 1.5s infinite;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.9); }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .hero-content {
+      align-self: center;
+      max-width: 800px;
     }
 
     .hero h1 {
-      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-size: clamp(2.25rem, 5.5vw, 4.5rem);
       font-weight: 700;
-      line-height: 1.1;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
       margin-bottom: 1.5rem;
-      animation: fadeUp 0.6s ease-out 0.1s both;
     }
 
-    .hero h1 span {
-      background: linear-gradient(135deg, var(--accent) 0%, var(--warm) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+    .hero h1 .accent-word {
+      color: var(--accent);
+      position: relative;
+    }
+
+    .hero h1 .accent-word::after {
+      content: '';
+      position: absolute;
+      bottom: 0.1em; left: 0; right: 0;
+      height: 0.15em;
+      background: var(--accent-glow);
+      z-index: -1;
     }
 
     .hero p {
-      font-size: clamp(1rem, 2vw, 1.25rem);
-      color: var(--muted);
-      max-width: 60ch;
+      font-size: clamp(1rem, 1.8vw, 1.125rem);
+      color: var(--fg-dim);
+      max-width: 65ch;
       margin-bottom: 2.5rem;
-      animation: fadeUp 0.6s ease-out 0.2s both;
+      line-height: 1.7;
     }
 
     .hero-actions {
       display: flex;
-      gap: 1rem;
+      gap: 0.75rem;
       flex-wrap: wrap;
-      animation: fadeUp 0.6s ease-out 0.3s both;
+      align-items: center;
     }
 
     .btn {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.875rem 1.75rem;
+      padding: 0.8125rem 1.5rem;
       border-radius: 8px;
       font-weight: 600;
-      font-size: 0.875rem;
+      font-size: 0.8125rem;
       text-decoration: none;
-      transition: all 0.2s;
-      border: none;
+      transition: all 0.15s;
+      border: 1px solid transparent;
       cursor: pointer;
+      white-space: nowrap;
     }
 
     .btn-primary {
       background: var(--accent);
       color: var(--bg);
+      border-color: var(--accent);
     }
 
     .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 32px var(--accent-dim);
+      background: #00e6ac;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px var(--accent-glow);
     }
 
     .btn-secondary {
-      background: var(--card);
+      background: transparent;
       color: var(--fg);
-      border: 1px solid var(--border);
+      border-color: var(--border-bright);
     }
 
     .btn-secondary:hover {
       border-color: var(--accent);
       color: var(--accent);
+      background: var(--accent-glow);
     }
 
-    .btn-github {
+    .btn-ghost {
       background: transparent;
+      color: var(--fg-dim);
+      border-color: transparent;
+      padding: 0.5rem 0;
+    }
+
+    .btn-ghost:hover { color: var(--fg); }
+
+    /* Version pill */
+    .version-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
       color: var(--muted);
+      padding: 0.25rem 0.625rem;
+      background: var(--card);
       border: 1px solid var(--border);
+      border-radius: 4px;
     }
 
-    .btn-github:hover {
-      color: var(--fg);
-      border-color: var(--fg);
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Stats bar */
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1.5rem;
-      padding: 3rem 2rem;
-      max-width: 1200px;
-      margin: 0 auto;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .stat {
-      text-align: center;
-      padding: 1rem;
-    }
-
-    .stat-value {
-      font-size: 2.5rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, var(--fg) 0%, var(--accent) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .stat-label {
-      font-size: 0.75rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-top: 0.25rem;
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 0 2rem;
     }
 
     /* Sections */
@@ -286,39 +291,39 @@
     }
 
     .section-header {
-      text-align: center;
-      margin-bottom: 4rem;
+      margin-bottom: 3.5rem;
     }
 
     .section-tag {
       display: inline-block;
-      font-size: 0.75rem;
-      font-weight: 600;
+      font-size: 0.65rem;
+      font-weight: 700;
       color: var(--accent);
       text-transform: uppercase;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.2em;
       margin-bottom: 1rem;
     }
 
     .section-header h2 {
-      font-size: clamp(2rem, 4vw, 3rem);
+      font-size: clamp(1.75rem, 3.5vw, 2.75rem);
       font-weight: 700;
+      letter-spacing: -0.02em;
       color: var(--fg);
     }
 
-    /* Presets Grid */
+    /* Presets - voxel card style */
     .presets-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.25rem;
     }
 
     .preset-card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 2rem;
-      transition: all 0.3s;
+      border-radius: 12px;
+      padding: 1.75rem;
+      transition: all 0.2s;
       position: relative;
       overflow: hidden;
     }
@@ -327,80 +332,92 @@
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0;
-      height: 4px;
+      height: 3px;
       background: var(--preset-color);
       transform: scaleX(0);
       transform-origin: left;
-      transition: transform 0.3s;
+      transition: transform 0.25s;
     }
 
     .preset-card:hover::before { transform: scaleX(1); }
     .preset-card:hover {
       border-color: var(--preset-color);
-      transform: translateY(-4px);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      background: var(--card-hover);
+      transform: translateY(-2px);
+    }
+
+    .preset-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
     }
 
     .preset-icon {
-      width: 48px; height: 48px;
-      border-radius: 12px;
+      width: 40px; height: 40px;
+      border-radius: 8px;
       background: var(--preset-color);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 1rem;
-      opacity: 0.2;
+      flex-shrink: 0;
+      opacity: 0.15;
     }
 
-    .preset-card h3 {
-      font-size: 1.25rem;
+    .preset-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.375rem;
+    }
+
+    .preset-category {
+      font-size: 0.6rem;
       font-weight: 700;
-      margin-bottom: 0.5rem;
-    }
-
-    .preset-card .category {
-      font-size: 0.7rem;
-      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.1em;
       color: var(--preset-color);
-      margin-bottom: 1rem;
-      display: inline-block;
-    }
-
-    .preset-card p {
-      color: var(--muted);
-      font-size: 0.9rem;
-      margin-bottom: 1.5rem;
+      padding: 0.125rem 0.5rem;
+      background: var(--bg);
+      border: 1px solid var(--preset-color);
+      border-radius: 4px;
     }
 
     .preset-qualities {
       display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
+      gap: 0.375rem;
     }
 
-    .quality-badge {
-      padding: 0.375rem 0.75rem;
-      border-radius: 100px;
-      font-size: 0.65rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+    .quality-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
       background: var(--bg);
-      border: 1px solid var(--border);
-      color: var(--muted);
+      transition: all 0.15s;
     }
 
-    .quality-badge.low { border-color: #4ade80; color: #4ade80; }
-    .quality-badge.medium { border-color: #fbbf24; color: #fbbf24; }
-    .quality-badge.high { border-color: #f87171; color: #f87171; }
+    .quality-dot.low { border-color: #4ade80; background: #4ade80; box-shadow: 0 0 8px #4ade8060; }
+    .quality-dot.medium { border-color: #fbbf24; background: #fbbf24; box-shadow: 0 0 8px #fbbf2460; }
+    .quality-dot.high { border-color: #f87171; background: #f87171; box-shadow: 0 0 8px #f8717160; }
 
-    /* Code blocks */
+    .preset-card h3 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .preset-card p {
+      color: var(--fg-dim);
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+
+    /* Code blocks - terminal style */
     .code-block {
-      background: #0d0d14;
+      background: #08080a;
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 8px;
       overflow: hidden;
       margin: 1.5rem 0;
       position: relative;
@@ -410,40 +427,45 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.75rem 1rem;
-      background: #14141f;
+      padding: 0.625rem 1rem;
+      background: #0c0c0f;
       border-bottom: 1px solid var(--border);
-      font-size: 0.75rem;
-      color: var(--muted);
+      font-size: 0.7rem;
     }
 
-    .code-header .lang { text-transform: uppercase; letter-spacing: 0.05em; }
+    .code-header .lang {
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
 
     .copy-btn {
       background: transparent;
-      border: none;
-      color: var(--muted);
+      border: 1px solid var(--border);
+      color: var(--fg-dim);
       cursor: pointer;
-      padding: 0.25rem 0.5rem;
+      padding: 0.25rem 0.625rem;
       border-radius: 4px;
-      font-size: 0.7rem;
-      transition: all 0.2s;
+      font-size: 0.65rem;
+      font-weight: 500;
+      font-family: inherit;
+      transition: all 0.15s;
     }
 
-    .copy-btn:hover { color: var(--accent); background: var(--accent-dim); }
-
-    .copy-btn.copied { color: var(--accent); }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { border-color: var(--accent); color: var(--accent); }
 
     pre {
-      padding: 1.5rem;
+      padding: 1.25rem 1.5rem;
       overflow-x: auto;
-      font-size: 0.8rem;
+      font-size: 0.775rem;
       line-height: 1.7;
+      tab-size: 2;
     }
 
-    code { color: #e8e8f0; }
+    code { color: #c8c8d8; }
 
-    .token.comment { color: #6b6b7a; }
+    .token.comment { color: #5a5a6a; }
     .token.keyword { color: #c792ea; }
     .token.string { color: #ecc48d; }
     .token.function { color: #82aaff; }
@@ -451,90 +473,185 @@
     .token.operator { color: #89ddff; }
     .token.punctuation { color: #89ddff; }
     .token.class-name { color: #ffcb6b; }
+    .token.boolean { color: #f78c6c; }
+    .token.constant { color: #ffcb6b; }
 
     /* Features */
     .features-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
     }
 
     .feature {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 2rem;
-      transition: all 0.3s;
+      border-radius: 10px;
+      padding: 1.5rem;
+      transition: all 0.2s;
     }
 
-    .feature:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .feature:hover { border-color: var(--border-bright); }
 
-    .feature-icon {
-      width: 40px; height: 40px;
-      border-radius: 10px;
-      background: var(--accent-dim);
+    .feature-title {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
       display: flex;
       align-items: center;
-      justify-content: center;
-      margin-bottom: 1rem;
-      color: var(--accent);
+      gap: 0.5rem;
     }
 
-    .feature h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
-    .feature p { color: var(--muted); font-size: 0.9rem; }
+    .feature-title::before {
+      content: '';
+      width: 8px; height: 8px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
 
-    /* Performance */
-    .perf-grid {
+    .feature p { color: var(--fg-dim); font-size: 0.8125rem; line-height: 1.6; }
+
+    /* Performance table */
+    .perf-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+    }
+
+    .perf-table th,
+    .perf-table td {
+      padding: 0.875rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .perf-table th {
+      font-weight: 600;
+      color: var(--fg-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.65rem;
+      background: var(--bg-deep);
+    }
+
+    .perf-table tr:hover td { background: var(--card-hover); }
+
+    .perf-table .preset-name { font-weight: 600; color: var(--fg); }
+    .perf-table .quality { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; }
+    .perf-table .overhead { color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+    .perf-table .features { color: var(--fg-dim); font-size: 0.75rem; }
+
+    .perf-table .quality.low { color: #4ade80; }
+    .perf-table .quality.medium { color: #fbbf24; }
+    .perf-table .quality.high { color: #f87171; }
+
+    /* Install steps */
+    .install-steps {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
     }
 
-    .perf-card {
+    .step {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 1.5rem;
+      padding: 1.75rem;
+      position: relative;
     }
 
-    .perf-card h4 { font-size: 0.9rem; margin-bottom: 0.75rem; color: var(--accent); }
-    .perf-card .preset { font-weight: 600; margin-bottom: 0.5rem; }
-    .perf-card .metrics { display: flex; gap: 1rem; font-size: 0.8rem; color: var(--muted); }
+    .step::before {
+      content: attr(data-step);
+      position: absolute;
+      top: -12px; left: 1.5rem;
+      width: 24px; height: 24px;
+      background: var(--accent);
+      color: var(--bg);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .step h3 { font-size: 1rem; margin-bottom: 1rem; }
 
     /* Footer */
     footer {
       padding: 3rem 2rem;
       text-align: center;
       border-top: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 0.875rem;
+      background: var(--bg-deep);
     }
 
-    footer a { color: var(--accent); text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+      max-width: 1000px;
+      margin: 0 auto 2rem;
+      text-align: left;
+    }
 
-    /* Scroll reveal */
-    .reveal { opacity: 0; transform: translateY(30px); transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+    .footer-col h4 {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .footer-col a {
+      display: block;
+      color: var(--fg-dim);
+      text-decoration: none;
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+      transition: color 0.15s;
+    }
+
+    .footer-col a:hover { color: var(--accent); }
+
+    .footer-bottom {
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .footer-bottom a { color: var(--accent); text-decoration: none; }
+    .footer-bottom a:hover { text-decoration: underline; }
+
+    /* Reveal */
+    .reveal { opacity: 0; transform: translateY(20px); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
     .reveal.visible { opacity: 1; transform: translateY(0); }
 
     /* Responsive */
     @media (max-width: 768px) {
-      nav { padding: 1rem; }
+      nav { padding: 0.875rem 1rem; }
       .nav-links { display: none; }
       .hero { padding: 5rem 1rem 3rem; }
-      section { padding: 3rem 1rem; }
-      .stats { grid-template-columns: repeat(2, 1fr); }
+      section { padding: 3.5rem 1rem; }
+      .footer-grid { text-align: center; }
     }
+
+    /* Focus visible */
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   </style>
 </head>
 <body>
-  <canvas id="bg-canvas"></canvas>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <canvas id="voxel-canvas"></canvas>
 
   <nav>
     <a href="#" class="nav-brand">
-      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="32" height="32" rx="8" fill="currentColor" opacity="0.15"/>
-        <path d="M8 12h16M8 16h12M8 20h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="24" height="24" rx="4" fill="currentColor" opacity="0.1"/>
+        <path d="M6 8h16M6 14h12M6 20h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       </svg>
       Eagler Shaders
     </a>
@@ -544,43 +661,27 @@
       <li><a href="#performance">Performance</a></li>
       <li><a href="#install">Install</a></li>
     </ul>
-    <a href="https://github.com/NT9712/eagler-shaders" class="btn btn-github" target="_blank">
+    <a href="https://github.com/NT9712/eagler-shaders" class="btn btn-ghost" target="_blank" rel="noopener">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
       GitHub
     </a>
   </nav>
 
-  <main>
+  <main id="main">
     <section class="hero">
-      <div class="hero-badge">
-        <span>Version 1.0.0</span>
-      </div>
-      <h1>Shaders that <span>don't kill your FPS</span></h1>
-      <p>A lightweight, visually distinctive shader collection for Eaglercraft with six presets across three quality tiers—built for integrated GPUs, Chromebooks, and ancient laptops.</p>
-      <div class="hero-actions">
-        <a href="#install" class="btn btn-primary">Get Started</a>
-        <a href="https://github.com/NT9712/eagler-shaders" class="btn btn-secondary" target="_blank">View on GitHub</a>
+      <div class="hero-badge">v1.0.0</div>
+      <div class="hero-content">
+        <h1>Shaders that <span class="accent-word">don't kill your FPS</span></h1>
+        <p>Six presets. Three quality tiers. One-line integration. Built for integrated GPUs, Chromebooks, and the laptop you've had since 2015.</p>
+        <div class="hero-actions">
+          <a href="#install" class="btn btn-primary">Get Started</a>
+          <a href="https://github.com/NT9712/eagler-shaders" class="btn btn-secondary" target="_blank" rel="noopener">View Source</a>
+          <span class="version-pill mono">Apache 2.0</span>
+        </div>
       </div>
     </section>
 
-    <div class="stats">
-      <div class="stat">
-        <div class="stat-value">6</div>
-        <div class="stat-label">Presets</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value">15</div>
-        <div class="stat-label">Shader Programs</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value">3</div>
-        <div class="stat-label">Quality Tiers</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value"><2%</div>
-        <div class="stat-label">FPS Overhead (LOW)</div>
-      </div>
-    </div>
+    <div class="divider"></div>
 
     <section id="presets">
       <div class="section-header reveal">
@@ -590,150 +691,160 @@
 
       <div class="presets-grid">
         <!-- Vanilla Enhanced -->
-        <article class="preset-card reveal" style="--preset-color: #4ade80;">
-          <div class="preset-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <article class="preset-card reveal" style="--preset-color: #5dab3d;">
+          <div class="preset-header">
+            <div class="preset-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3L4 9l8 6 8-6-8-6z"/><path d="M4 9v12l8 6 8-6V9"/></svg>
+            </div>
+            <div class="preset-meta">
+              <span class="preset-category">Light</span>
+              <div class="preset-qualities">
+                <span class="quality-dot low" title="LOW"></span>
+                <span class="quality-dot medium" title="MEDIUM"></span>
+                <span class="quality-dot high" title="HIGH"></span>
+              </div>
+            </div>
           </div>
-          <span class="category">Light</span>
           <h3>Vanilla Enhanced</h3>
-          <p>The default. Better color balance, warmer sunlight, lightweight fog, improved sky—barely any overhead.</p>
-          <div class="preset-qualities">
-            <span class="quality-badge low">LOW</span>
-            <span class="quality-badge medium">MEDIUM</span>
-            <span class="quality-badge high">HIGH</span>
-          </div>
+          <p>The default. Better color balance, warmer sunlight, lightweight distance fog, improved sky. Barely any overhead.</p>
         </article>
 
         <!-- Bright -->
-        <article class="preset-card reveal" style="--preset-color: #fbbf24;">
-          <div class="preset-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <article class="preset-card reveal" style="--preset-color: #ffb84d;">
+          <div class="preset-header">
+            <div class="preset-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+            </div>
+            <div class="preset-meta">
+              <span class="preset-category">Light</span>
+              <div class="preset-qualities">
+                <span class="quality-dot low" title="LOW"></span>
+                <span class="quality-dot medium" title="MEDIUM"></span>
+                <span class="quality-dot high" title="HIGH"></span>
+              </div>
+            </div>
           </div>
-          <span class="category">Light</span>
           <h3>Bright</h3>
-          <p>Brighter lighting, clearer atmosphere, more vibrant colors. No expensive bloom—just smart color grading.</p>
-          <div class="preset-qualities">
-            <span class="quality-badge low">LOW</span>
-            <span class="quality-badge medium">MEDIUM</span>
-            <span class="quality-badge high">HIGH</span>
-          </div>
+          <p>Brighter lighting, clearer atmosphere, more vibrant colors. No bloom pipeline—just smart color grading and temperature shifts.</p>
         </article>
 
         <!-- Soft -->
         <article class="preset-card reveal" style="--preset-color: #a78bfa;">
-          <div class="preset-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+          <div class="preset-header">
+            <div class="preset-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3a6 6 0 0 0-6 6v6a6 6 0 0 0 6 6h6a6 6 0 0 0 6-6V9a6 6 0 0 0-6-6z"/></svg>
+            </div>
+            <div class="preset-meta">
+              <span class="preset-category">Light</span>
+              <div class="preset-qualities">
+                <span class="quality-dot low" title="LOW"></span>
+                <span class="quality-dot medium" title="MEDIUM"></span>
+              </div>
+            </div>
           </div>
-          <span class="category">Light</span>
           <h3>Soft</h3>
-          <p>Gentle transitions, reduced harsh lighting, subtle atmosphere. Lower contrast, lifted shadows.</p>
-          <div class="preset-qualities">
-            <span class="quality-badge low">LOW</span>
-            <span class="quality-badge medium">MEDIUM</span>
-          </div>
+          <p>Gentle transitions, reduced harsh lighting, lifted shadows, subtle atmosphere. Lower contrast, slight desaturation.</p>
         </article>
 
         <!-- Nightfall -->
         <article class="preset-card reveal" style="--preset-color: #60a5fa;">
-          <div class="preset-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <div class="preset-header">
+            <div class="preset-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </div>
+            <div class="preset-meta">
+              <span class="preset-category">Dark</span>
+              <div class="preset-qualities">
+                <span class="quality-dot low" title="LOW"></span>
+                <span class="quality-dot medium" title="MEDIUM"></span>
+                <span class="quality-dot high" title="HIGH"></span>
+              </div>
+            </div>
           </div>
-          <span class="category">Dark</span>
           <h3>Nightfall</h3>
-          <p>Darker ambient, increased contrast, atmospheric fog, nighttime mood. Optional subtle colored lighting.</p>
-          <div class="preset-qualities">
-            <span class="quality-badge low">LOW</span>
-            <span class="quality-badge medium">MEDIUM</span>
-            <span class="quality-badge high">HIGH</span>
-          </div>
+          <p>Darker ambient, increased contrast, atmospheric fog, nighttime mood. Dynamic sky color—sunset actually looks like sunset.</p>
         </article>
 
         <!-- Noir -->
         <article class="preset-card reveal" style="--preset-color: #f472b6;">
-          <div class="preset-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+          <div class="preset-header">
+            <div class="preset-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>
+            </div>
+            <div class="preset-meta">
+              <span class="preset-category">Dark</span>
+              <div class="preset-qualities">
+                <span class="quality-dot low" title="LOW"></span>
+                <span class="quality-dot medium" title="MEDIUM"></span>
+              </div>
+            </div>
           </div>
-          <span class="category">Dark</span>
           <h3>Noir</h3>
-          <p>High contrast, near-monochrome, crushed shadows. Strong visual identity through cheap color transforms.</p>
-          <div class="preset-qualities">
-            <span class="quality-badge low">LOW</span>
-            <span class="quality-badge medium">MEDIUM</span>
-          </div>
+          <p>High contrast, near-monochrome, crushed shadows. Strong visual identity through cheap color transforms—no expensive passes.</p>
         </article>
 
         <!-- Abyss -->
         <article class="preset-card reveal" style="--preset-color: #22d3ee;">
-          <div class="preset-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12c0 1.2-2 4-6 4-4 0-6-2.8-6-4"/><path d="M3 12c0-1.2 2-4 6-4 4 0 6 2.8 6 4"/></svg>
+          <div class="preset-header">
+            <div class="preset-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3a6 6 0 0 0 0 12 6 6 0 0 0 0-12z"/><path d="M12 3v18"/></svg>
+            </div>
+            <div class="preset-meta">
+              <span class="preset-category">Dark</span>
+              <div class="preset-qualities">
+                <span class="quality-dot low" title="LOW"></span>
+                <span class="quality-dot medium" title="MEDIUM"></span>
+              </div>
+            </div>
           </div>
-          <span class="category">Dark</span>
           <h3>Abyss</h3>
-          <p>Deep shadows, cool/dark color grading, heavy distance fog. No volumetrics—just exponential fog.</p>
-          <div class="preset-qualities">
-            <span class="quality-badge low">LOW</span>
-            <span class="quality-badge medium">MEDIUM</span>
-          </div>
+          <p>Deep shadows, cool color grading, heavy exponential² distance fog. No volumetrics—just fog that actually works on Intel HD.</p>
         </article>
       </div>
     </section>
+
+    <div class="divider"></div>
 
     <section id="features">
       <div class="section-header reveal">
         <span class="section-tag">Features</span>
-        <h2>Built different</h2>
+        <h2>Built for the hardware you actually have</h2>
       </div>
 
       <div class="features-grid">
         <article class="feature reveal">
-          <div class="feature-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          </div>
-          <h3>Aggressive LOW mode</h3>
-          <p>Fast sRGB approximation, no tonemapping, no vignette, no dithering, linear fog. Targets vanilla FPS on Intel UHD / ancient Chromebooks.</p>
+          <div class="feature-title">Aggressive LOW mode</div>
+          <p>Fast sRGB approximation (x*x / sqrt), no tonemapping, no vignette, no dithering, linear fog. Targets vanilla FPS on Intel UHD 620 / ancient Chromebooks.</p>
         </article>
 
         <article class="feature reveal">
-          <div class="feature-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          </div>
-          <h3>Capability detection</h3>
-          <p>Auto-detects WebGL2, uniform limits, derivative support, draw buffers. Gracefully degrades or disables features.</p>
+          <div class="feature-title">Capability detection</div>
+          <p>Auto-detects WebGL2, uniform limits, derivative support, draw buffers, frag depth. Gracefully degrades or disables features per-device.</p>
         </article>
 
         <article class="feature reveal">
-          <div class="feature-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          </div>
-          <h3>Safe fallbacks</h3>
-          <p>Shader compilation failure? Missing uniform? Unsupported extension? Falls back to vanilla instantly—no renderer crash.</p>
+          <div class="feature-title">Safe fallbacks</div>
+          <p>Shader compilation failure? Missing uniform? Unsupported extension? Falls back to vanilla instantly—renderer never crashes.</p>
         </article>
 
         <article class="feature reveal">
-          <div class="feature-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
-          </div>
-          <h3>One-step integration</h3>
-          <p><code>EaglercraftShaderIntegration.install(renderer)</code> — registers presets, compiles shaders, selects defaults, handles reloads.</p>
+          <div class="feature-title">One-step integration</div>
+          <p><code class="mono">EaglercraftShaderIntegration.install(renderer)</code> — registers presets, compiles shaders, selects defaults, handles reloads, exposes clean API.</p>
         </article>
 
         <article class="feature reveal">
-          <div class="feature-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 16 17 22 11"/><line x1="18" y1="6" x2="18" y2="6"/></svg>
-          </div>
-          <h3>Shared GLSL utilities</h3>
-          <p>Color grading (lift/gamma/gain), fog, tonemapping (Reinhard/Filmic), vignette, dithering, sky color—reused across all presets.</p>
+          <div class="feature-title">Shared GLSL utilities</div>
+          <p>Color grading (lift/gamma/gain), fog (exp/exp²/linear), tonemapping (Reinhard/Filmic), vignette, blue-noise dithering, sky color—reused across all 15 programs.</p>
         </article>
 
         <article class="feature reveal">
-          <div class="feature-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          </div>
-          <h3>Time-aware</h3>
-          <p>DayTime uniform drives dynamic sky colors, temperature shifts, fog density—sunrise/sunset actually look different.</p>
+          <div class="feature-title">Time-aware</div>
+          <p>DayTime uniform drives dynamic sky colors, temperature shifts, fog density. Sunrise/sunset actually look different without a skybox.</p>
         </article>
       </div>
     </section>
+
+    <div class="divider"></div>
 
     <section id="performance">
       <div class="section-header reveal">
@@ -741,66 +852,76 @@
         <h2>Numbers that matter</h2>
       </div>
 
-      <div class="perf-grid">
-        <article class="perf-card reveal">
-          <h4>Vanilla Enhanced</h4>
-          <div class="preset">LOW</div>
-          <div class="metrics">
-            <span>~1-2% overhead</span>
-            <span>No tonemap</span>
-            <span>Fast sRGB</span>
-          </div>
-        </article>
-        <article class="perf-card reveal">
-          <h4>Vanilla Enhanced</h4>
-          <div class="preset">MEDIUM</div>
-          <div class="metrics">
-            <span>~3-5% overhead</span>
-            <span>Filmic TM</span>
-            <span>Dynamic sky</span>
-          </div>
-        </article>
-        <article class="perf-card reveal">
-          <h4>Vanilla Enhanced</h4>
-          <div class="preset">HIGH</div>
-          <div class="metrics">
-            <span>~5-8% overhead</span>
-            <span>+Dithering</span>
-            <span>Exp² fog</span>
-          </div>
-        </article>
-        <article class="perf-card reveal">
-          <h4>Nightfall</h4>
-          <div class="preset">LOW</div>
-          <div class="metrics">
-            <span>~2-3% overhead</span>
-            <span>Heavy fog</span>
-            <span>Vignette on</span>
-          </div>
-        </article>
-        <article class="perf-card reveal">
-          <h4>Noir</h4>
-          <div class="preset">LOW</div>
-          <div class="metrics">
-            <span>~1-2% overhead</span>
-            <span>Monochrome</span>
-            <span>High contrast</span>
-          </div>
-        </article>
-        <article class="perf-card reveal">
-          <h4>Abyss</h4>
-          <div class="preset">LOW</div>
-          <div class="metrics">
-            <span>~2-4% overhead</span>
-            <span>Exp² fog</span>
-            <span>Blue tint</span>
-          </div>
-        </article>
-      </div>
+      <table class="perf-table reveal">
+        <thead>
+          <tr>
+            <th>Preset</th>
+            <th>Quality</th>
+            <th>Overhead (est.)</th>
+            <th>Enabled Features</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="preset-name">Vanilla Enhanced</td>
+            <td class="quality low">LOW</td>
+            <td class="overhead">~1–2%</td>
+            <td class="features">Fast sRGB, linear fog, no TM</td>
+          </tr>
+          <tr>
+            <td class="preset-name">Vanilla Enhanced</td>
+            <td class="quality medium">MEDIUM</td>
+            <td class="overhead">~3–5%</td>
+            <td class="features">Filmic TM, vignette, dynamic sky, exp² fog</td>
+          </tr>
+          <tr>
+            <td class="preset-name">Vanilla Enhanced</td>
+            <td class="quality high">HIGH</td>
+            <td class="overhead">~5–8%</td>
+            <td class="features">+Blue noise dithering, LGG color wheels</td>
+          </tr>
+          <tr>
+            <td class="preset-name">Bright</td>
+            <td class="quality low">LOW</td>
+            <td class="overhead">~1–2%</td>
+            <td class="features">Saturation boost, warm temp, light fog</td>
+          </tr>
+          <tr>
+            <td class="preset-name">Soft</td>
+            <td class="quality low">LOW</td>
+            <td class="overhead">~1–2%</td>
+            <td class="features">Reduced contrast, lifted shadows, gentle vignette</td>
+          </tr>
+          <tr>
+            <td class="preset-name">Nightfall</td>
+            <td class="quality low">LOW</td>
+            <td class="overhead">~2–3%</td>
+            <td class="features">Heavy fog, strong vignette, cool temp</td>
+          </tr>
+          <tr>
+            <td class="preset-name">Nightfall</td>
+            <td class="quality medium">MEDIUM</td>
+            <td class="overhead">~4–6%</td>
+            <td class="features">Dynamic sky bleed, moon glow (HIGH only)</td>
+          </tr>
+          <tr>
+            <td class="preset-name">Noir</td>
+            <td class="quality low">LOW</td>
+            <td class="overhead">~1–2%</td>
+            <td class="features">Monochrome LUT, high contrast, crushed blacks</td>
+          </tr>
+          <tr>
+            <td class="preset-name">Abyss</td>
+            <td class="quality low">LOW</td>
+            <td class="overhead">~2–4%</td>
+            <td class="features">Exp² fog, blue/green tint, deep shadow crush</td>
+          </tr>
+        </tbody>
+      </table>
 
-      <div style="margin-top: 3rem; padding: 2rem; background: var(--card); border: 1px solid var(--border); border-radius: 16px;">
-        <h3 style="margin-bottom: 1rem;">What LOW mode disables</h3>
-        <ul style="columns: 2; list-style: none; color: var(--muted); font-size: 0.9rem; line-height: 2;">
+      <div class="reveal" style="margin-top: 2.5rem; padding: 1.5rem; background: var(--card); border: 1px solid var(--border); border-radius: 10px;">
+        <h3 style="margin-bottom: 1rem; font-size: 0.9375rem;">What LOW mode disables</h3>
+        <ul style="columns: 2; list-style: none; color: var(--fg-dim); font-size: 0.8125rem; line-height: 2.2;">
           <li>✗ Tonemapping (Reinhard only if forced)</li>
           <li>✗ Vignette effect</li>
           <li>✗ Blue noise dithering</li>
@@ -813,15 +934,20 @@
       </div>
     </section>
 
+    <div class="divider"></div>
+
     <section id="install">
       <div class="section-header reveal">
         <span class="section-tag">Installation</span>
         <h2>Two steps. That's it.</h2>
       </div>
 
-      <div class="code-block reveal">
-        <div class="code-header"><span class="lang">gradle.kts</span><button class="copy-btn" data-target="gradle">Copy</button></div>
-        <pre><code class="language-kotlin">repositories {
+      <div class="install-steps">
+        <article class="step reveal" data-step="1">
+          <h3>Add the dependency</h3>
+          <div class="code-block">
+            <div class="code-header"><span class="lang">gradle.kts</span><button class="copy-btn" data-target="gradle">Copy</button></div>
+            <pre><code class="language-kotlin">repositories {
     mavenCentral()
     maven { url = uri("https://eaglercraft-teavm-fork.github.io/maven/") }
 }
@@ -829,41 +955,78 @@
 dependencies {
     implementation("com.eaglercraft.shaders:eagler-shaders:1.0.0")
 }</code></pre>
-      </div>
+          </div>
+        </article>
 
-      <div class="code-block reveal">
-        <div class="code-header"><span class="lang">java</span><button class="copy-btn" data-target="java">Copy</button></div>
-        <pre><code class="language-java">import com.eaglercraft.shaders.EaglercraftShaderIntegration;
+        <article class="step reveal" data-step="2">
+          <h3>Initialize once</h3>
+          <div class="code-block">
+            <div class="code-header"><span class="lang">java</span><button class="copy-btn" data-target="java">Copy</button></div>
+            <pre><code class="language-java">import com.eaglercraft.shaders.EaglercraftShaderIntegration;
 import net.minecraft.client.renderer.GameRenderer;
 
-// Call once during client startup, after GameRenderer exists
+// Call once during client startup
 EaglercraftShaderIntegration.install(gameRenderer);
 
 // Later: switch presets, change quality, toggle
 ShaderCollection.enable("nightfall");
 ShaderCollection.setQuality(ShaderQuality.MEDIUM);
 ShaderCollection.toggleShaders();</code></pre>
+          </div>
+        </article>
       </div>
 
-      <div class="code-block reveal">
-        <div class="code-header"><span class="lang">java</span><button class="copy-btn" data-target="hook">Copy</button></div>
-        <pre><code class="language-java">// In GameRenderer.updateCameraAndRender, replace vanilla shader rendering:
+      <div class="reveal">
+        <h3 style="margin-bottom: 1rem; font-size: 0.9375rem;">Hook into the render pipeline (optional)</h3>
+        <div class="code-block">
+          <div class="code-header"><span class="lang">java</span><button class="copy-btn" data-target="hook">Copy</button></div>
+          <pre><code class="language-java">// In GameRenderer.updateCameraAndRender, replace vanilla shader block:
 if (GLX.usePostProcess) {
     mc.worldRenderer.renderEntityOutlineFramebuffer();
-    // Replace vanilla shader block with:
+    // Replace vanilla shader rendering with:
     EaglercraftShaderIntegration.renderShaders(partialTicks, this.useShader);
     mc.getFramebuffer().bindFramebuffer(true);
 }</code></pre>
+        </div>
       </div>
 
-      <p style="text-align: center; color: var(--muted); margin-top: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
-        The mod also auto-initializes via <code>FMLClientSetupEvent</code> if you just drop the JAR in <code>mods/</code>.
+      <p class="reveal" style="margin-top: 2rem; color: var(--fg-dim); max-width: 700px;">
+        The mod also auto-initializes via <code class="mono">FMLClientSetupEvent</code> if you just drop the JAR in <code class="mono">mods/</code>. Requires Eaglercraft 26.2+ (1.16.5), Forge 36+, Java 11+.
       </p>
     </section>
   </main>
 
   <footer>
-    <p>Eaglercraft Shader Collection • Apache 2.0 • <a href="https://github.com/NT9712/eagler-shaders" target="_blank">GitHub</a> • Built for <a href="https://eaglercraft.com" target="_blank">Eaglercraft</a></p>
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>Presets</h4>
+        <a href="#presets">Vanilla Enhanced</a>
+        <a href="#presets">Bright</a>
+        <a href="#presets">Soft</a>
+        <a href="#presets">Nightfall</a>
+        <a href="#presets">Noir</a>
+        <a href="#presets">Abyss</a>
+      </div>
+      <div class="footer-col">
+        <h4>Quality</h4>
+        <a href="#performance">LOW — Maximum FPS</a>
+        <a href="#performance">MEDIUM — Balanced</a>
+        <a href="#performance">HIGH — Best visuals</a>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <a href="https://github.com/NT9712/eagler-shaders" target="_blank" rel="noopener">GitHub Repository</a>
+        <a href="https://eaglercraft.com" target="_blank" rel="noopener">Eaglercraft Website</a>
+        <a href="https://github.com/lax1dude/eaglercraftx" target="_blank" rel="noopener">EaglercraftX Source</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a href="LICENSE">Apache 2.0 License</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>Eaglercraft Shader Collection • Apache 2.0 • Built for <a href="https://eaglercraft.com" target="_blank" rel="noopener">Eaglercraft</a> • Not affiliated with Mojang or Microsoft</p>
+    </div>
   </footer>
 
   <script type="importmap">
@@ -878,117 +1041,201 @@ if (GLX.usePostProcess) {
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-    // Scene setup
-    const canvas = document.getElementById('bg-canvas');
+    // ============================================
+    // VOXEL WORLD BACKGROUND
+    // ============================================
+    const canvas = document.getElementById('voxel-canvas');
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.z = 30;
+    scene.fog = new THREE.FogExp2(0x050507, 0.018);
+
+    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 200);
+    camera.position.set(18, 14, 18);
+    camera.lookAt(0, 2, 0);
 
     const controls = new OrbitControls(camera, canvas);
     controls.enableDamping = true;
     controls.enablePan = false;
     controls.enableZoom = false;
     controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.3;
+    controls.autoRotateSpeed = 0.15;
     controls.dampingFactor = 0.05;
+    controls.minPolarAngle = 0.4;
+    controls.maxPolarAngle = 1.3;
+    controls.minDistance = 15;
+    controls.maxDistance = 35;
 
-    // Shader particles
-    const particleCount = 800;
-    const geometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(particleCount * 3);
-    const colors = new Float32Array(particleCount * 3);
-    const sizes = new Float32Array(particleCount);
-    const velocities = new Float32Array(particleCount * 3);
+    // Voxel palette
+    const BLOCKS = {
+      grass:    { color: 0x5dab3d, top: 0x5dab3d, side: 0x8b6b42, bottom: 0x8b6b42 },
+      dirt:     { color: 0x8b6b42, top: 0x8b6b42, side: 0x8b6b42, bottom: 0x8b6b42 },
+      stone:    { color: 0x7d7d7d, top: 0x7d7d7d, side: 0x7d7d7d, bottom: 0x7d7d7d },
+      sand:     { color: 0xe8d8a8, top: 0xe8d8a8, side: 0xe8d8a8, bottom: 0xe8d8a8 },
+      water:    { color: 0x3d8fd8, top: 0x3d8fd8, side: 0x3d8fd8, bottom: 0x3d8fd8 },
+      leaves:   { color: 0x3a7d2e, top: 0x3a7d2e, side: 0x3a7d2e, bottom: 0x3a7d2e },
+      log:      { color: 0x5d4028, top: 0x5d4028, side: 0x5d4028, bottom: 0x5d4028 },
+      bedrock:  { color: 0x1a1a1a, top: 0x1a1a1a, side: 0x1a1a1a, bottom: 0x1a1a1a },
+    };
 
-    const palette = [
-      new THREE.Color(0x00d4aa), // accent
-      new THREE.Color(0xffb86b), // warm
-      new THREE.Color(0x6bb8ff), // cool
-      new THREE.Color(0xa78bfa), // purple
-    ];
+    // Geometry cache
+    const boxGeo = new THREE.BoxGeometry(1, 1, 1);
+    const instancedMeshes = new Map();
 
-    for (let i = 0; i < particleCount; i++) {
-      const radius = 10 + Math.random() * 15;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-
-      positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-      positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-      positions[i * 3 + 2] = radius * Math.cos(phi);
-
-      const color = palette[Math.floor(Math.random() * palette.length)];
-      colors[i * 3] = color.r;
-      colors[i * 3 + 1] = color.g;
-      colors[i * 3 + 2] = color.b;
-
-      sizes[i] = 0.5 + Math.random() * 1.5;
-
-      velocities[i * 3] = (Math.random() - 0.5) * 0.002;
-      velocities[i * 3 + 1] = (Math.random() - 0.5) * 0.002;
-      velocities[i * 3 + 2] = (Math.random() - 0.5) * 0.002;
+    function getMesh(blockType, count) {
+      if (instancedMeshes.has(blockType)) return instancedMeshes.get(blockType);
+      const mesh = new THREE.InstancedMesh(boxGeo, new THREE.MeshLambertMaterial({ color: blockType.color }), count);
+      mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      instancedMeshes.set(blockType, mesh);
+      scene.add(mesh);
+      return mesh;
     }
 
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+    // Simple noise for terrain
+    function noise2d(x, z, scale = 0.1, octaves = 3, persistence = 0.5) {
+      let value = 0, amplitude = 1, frequency = scale, max = 0;
+      for (let i = 0; i < octaves; i++) {
+        value += amplitude * Math.sin(x * frequency * 12.9898 + z * frequency * 78.233) * 43758.5453 % 1;
+        max += amplitude;
+        amplitude *= persistence;
+        frequency *= 2;
+      }
+      return value / max;
+    }
 
-    const material = new THREE.PointsMaterial({
-      size: 1,
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.8,
-      sizeAttenuation: true,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
+    // Generate terrain
+    const CHUNK_SIZE = 48;
+    const CHUNK_HALF = CHUNK_SIZE / 2;
+    const blockPositions = [];
+
+    for (let x = -CHUNK_HALF; x < CHUNK_HALF; x++) {
+      for (let z = -CHUNK_HALF; z < CHUNK_HALF; z++) {
+        // Continental noise
+        const continental = noise2d(x, z, 0.015, 2, 0.5);
+        const hills = noise2d(x, z, 0.05, 3, 0.5) * 0.3;
+        const detail = noise2d(x, z, 0.15, 2, 0.5) * 0.15;
+
+        let height = Math.floor((continental + hills + detail) * 18) + 8;
+        height = Math.max(2, Math.min(28, height));
+
+        // Biome noise
+        const biome = noise2d(x * 0.5, z * 0.5, 0.02, 2);
+
+        for (let y = 0; y <= height; y++) {
+          let block;
+          const depth = height - y;
+
+          if (y === 0) block = BLOCKS.bedrock;
+          else if (depth === 0) {
+            if (biome > 0.3) block = BLOCKS.sand;
+            else block = BLOCKS.grass;
+          }
+          else if (depth < 3) block = BLOCKS.dirt;
+          else if (depth < 8) block = BLOCKS.stone;
+          else block = BLOCKS.stone;
+
+          blockPositions.push({ x: x + 0.5, y: y + 0.5, z: z + 0.5, type: block });
+        }
+
+        // Water
+        if (height < 8) {
+          for (let y = height + 1; y <= 8; y++) {
+            blockPositions.push({ x: x + 0.5, y: y + 0.5, z: z + 0.5, type: BLOCKS.water });
+          }
+        }
+
+        // Trees
+        if (height > 8 && depth === 0 && biome < 0.2 && Math.random() < 0.008) {
+          const treeH = 4 + Math.floor(Math.random() * 3);
+          for (let ty = 1; ty <= treeH; ty++) {
+            blockPositions.push({ x: x + 0.5, y: height + ty + 0.5, z: z + 0.5, type: BLOCKS.log });
+          }
+          const leafH = treeH - 1;
+          for (let lx = -2; lx <= 2; lx++) {
+            for (let lz = -2; lz <= 2; lz++) {
+              for (let ly = leafH; ly <= leafH + 2; ly++) {
+                if (Math.abs(lx) + Math.abs(lz) <= 2 || Math.random() < 0.6) {
+                  blockPositions.push({ x: x + lx + 0.5, y: height + ly + 0.5, z: z + lz + 0.5, type: BLOCKS.leaves });
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Sort by type for instancing
+    const byType = {};
+    blockPositions.forEach(b => {
+      if (!byType[b.type.color]) byType[b.type.color] = [];
+      byType[b.type.color].push(b);
     });
 
-    const particles = new THREE.Points(geometry, material);
-    scene.add(particles);
+    // Create instanced meshes
+    Object.entries(byType).forEach(([color, blocks]) => {
+      const mesh = getMesh({ color: parseInt(color) }, blocks.length);
+      const dummy = new THREE.Object3D();
+      blocks.forEach((b, i) => {
+        dummy.position.set(b.x, b.y, b.z);
+        dummy.updateMatrix();
+        mesh.setMatrixAt(i, dummy.matrix);
+      });
+      mesh.instanceMatrix.needsUpdate = true;
+      mesh.count = blocks.length;
+    });
 
-    // Subtle ambient light
-    const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+    // Lighting
+    const sun = new THREE.DirectionalLight(0xffffee, 1.2);
+    sun.position.set(50, 80, 30);
+    scene.add(sun);
+
+    const fill = new THREE.DirectionalLight(0x4da3ff, 0.4);
+    fill.position.set(-30, 20, -30);
+    scene.add(fill);
+
+    const ambient = new THREE.AmbientLight(0x333344, 0.8);
     scene.add(ambient);
+
+    // Subtle stars
+    const starGeo = new THREE.BufferGeometry();
+    const starCount = 800;
+    const starPos = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount; i++) {
+      const r = 80 + Math.random() * 40;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      starPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+      starPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta) + 40;
+      starPos[i * 3 + 2] = r * Math.cos(phi);
+    }
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+    const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.8, transparent: true, opacity: 0.4, sizeAttenuation: true });
+    const stars = new THREE.Points(starGeo, starMat);
+    scene.add(stars);
 
     // Animation
     let time = 0;
     function animate() {
       requestAnimationFrame(animate);
+      time += 0.0008;
 
-      time += 0.001;
+      // Day/night cycle (slow)
+      const dayCycle = Math.sin(time * 0.3);
+      sun.intensity = THREE.MathUtils.lerp(0.2, 1.4, (dayCycle + 1) * 0.5);
+      sun.position.y = THREE.MathUtils.lerp(-20, 80, (dayCycle + 1) * 0.5);
+      sun.color.setHSL(0.1, 0.3, THREE.MathUtils.lerp(0.4, 0.95, (dayCycle + 1) * 0.5));
 
-      const posAttr = geometry.attributes.position;
-      const sizeAttr = geometry.attributes.size;
+      fill.intensity = THREE.MathUtils.lerp(0.1, 0.5, (dayCycle + 1) * 0.5);
+      ambient.intensity = THREE.MathUtils.lerp(0.3, 0.8, (dayCycle + 1) * 0.5);
 
-      for (let i = 0; i < particleCount; i++) {
-        posAttr.array[i * 3] += velocities[i * 3];
-        posAttr.array[i * 3 + 1] += velocities[i * 3 + 1];
-        posAttr.array[i * 3 + 2] += velocities[i * 3 + 2];
+      // Fog color shift
+      const fogColor = new THREE.Color();
+      fogColor.setHSL(0.58, 0.15, THREE.MathUtils.lerp(0.04, 0.18, (dayCycle + 1) * 0.5));
+      scene.fog.color = fogColor;
 
-        // Boundary wrap
-        const x = posAttr.array[i * 3];
-        const y = posAttr.array[i * 3 + 1];
-        const z = posAttr.array[i * 3 + 2];
-        const dist = Math.sqrt(x * x + y * y + z * z);
-
-        if (dist > 30) {
-          const theta = Math.random() * Math.PI * 2;
-          const phi = Math.acos(2 * Math.random() - 1);
-          const radius = 25 + Math.random() * 5;
-          posAttr.array[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-          posAttr.array[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-          posAttr.array[i * 3 + 2] = radius * Math.cos(phi);
-        }
-
-        // Pulsing size
-        sizeAttr.array[i] = (0.5 + Math.sin(time * 2 + i) * 0.5) * sizes[i];
-      }
-
-      posAttr.needsUpdate = true;
-      sizeAttr.needsUpdate = true;
+      stars.rotation.y += 0.00002;
 
       controls.update();
       renderer.render(scene, camera);
@@ -1009,33 +1256,36 @@ if (GLX.usePostProcess) {
           entry.target.classList.add('visible');
         }
       });
-    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
 
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
     // Copy buttons
     document.querySelectorAll('.copy-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const targetId = btn.dataset.target;
-        const codeBlock = document.querySelector(`.code-block [data-target="${targetId}"]`);
         const pre = btn.closest('.code-block').querySelector('pre');
         const text = pre.innerText;
-
         navigator.clipboard.writeText(text).then(() => {
-          btn.textContent = 'Copied!';
+          const original = btn.textContent;
+          btn.textContent = 'Copied';
           btn.classList.add('copied');
-          setTimeout(() => {
-            btn.textContent = 'Copy';
-            btn.classList.remove('copied');
-          }, 2000);
+          setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 1800);
         });
       });
     });
 
-    // Parallax hero on scroll
+    // Nav active state on scroll
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-links a');
     window.addEventListener('scroll', () => {
-      const scrolled = window.scrollY;
-      canvas.style.transform = `translateY(${scrolled * 0.3}px)`;
+      let current = '';
+      sections.forEach(section => {
+        const top = section.offsetTop - 120;
+        if (scrollY >= top) current = section.getAttribute('id');
+      });
+      navLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+      });
     });
   </script>
 </body>
