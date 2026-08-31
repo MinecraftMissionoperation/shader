@@ -12,17 +12,18 @@
     :root {
       --bg: #050507;
       --bg-deep: #030304;
-      --fg: #d8d8e0;
-      --fg-dim: #7a7a8a;
-      --muted: #4a4a5a;
+      --fg: #e0e0e8;
+      --fg-dim: #8a8a9a;
+      --muted: #5a5a6a;
       --accent: #00cc99;
-      --accent-glow: #00cc9940;
+      --accent-glow: #00cc9933;
       --warm: #ff9f43;
       --cool: #4da3ff;
-      --card: #0d0d12;
-      --card-hover: #14141c;
-      --border: #1e1e2a;
-      --border-bright: #2a2a3a;
+      --card: #0c0c11;
+      --card-hover: #13131a;
+      --border: #1f1f2b;
+      --border-bright: #2d2d3d;
+      --shadow: rgba(0,0,0,0.4);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -53,7 +54,7 @@
       top: 0; left: 0;
       width: 100%; height: 100%;
       z-index: -1;
-      background: var(--bg); /* Fallback */
+      background: var(--bg);
     }
 
     .skip-link {
@@ -78,8 +79,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: linear-gradient(180deg, rgba(5,5,7,0.95) 0%, rgba(5,5,7,0) 100%);
+      background: linear-gradient(180deg, rgba(5,5,7,0.98) 0%, rgba(5,5,7,0) 100%);
       border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
     }
 
     .nav-brand {
@@ -1053,67 +1055,92 @@ if (GLX.usePostProcess) {
       }, { passive: true });
     })();
 
-    // 4. THREE.JS BACKGROUND - isolated, won't break other features
+    // 4. VOXEL BACKGROUND - robust Three.js loading
     (function() {
       const canvas = document.getElementById('voxel-canvas');
       if (!canvas) return;
 
-      // Load Three.js dynamically with error handling
+      let threeLoaded = false;
+
       function loadThree() {
         return new Promise((resolve, reject) => {
-          // Check if already loaded
           if (window.THREE && window.OrbitControls) {
             resolve({ THREE: window.THREE, OrbitControls: window.OrbitControls });
             return;
           }
 
-          // Load via script tags (more reliable than importmap)
-          const scripts = [
-            'https://esm.sh/three@0.165.0',
-            'https://esm.sh/three@0.165.0/addons/controls/OrbitControls.js'
-          ];
-
-          let loaded = 0;
-          scripts.forEach(src => {
-            const script = document.createElement('script');
-            script.type = 'module';
-            script.src = src;
-            script.onload = () => { loaded++; if (loaded === scripts.length) checkReady(); };
-            script.onerror = () => reject(new Error('Failed to load ' + src));
-            document.head.appendChild(script);
-          });
-
-          function checkReady() {
-            // Wait a tick for modules to register
-            setTimeout(() => {
-              if (window.THREE && window.OrbitControls) {
+          // Method 1: Try importmap/ESM
+          const tryImport = () => {
+            import('https://esm.sh/three@0.165.0?pin=v120')
+              .then(THREE => {
+                window.THREE = THREE.default || THREE;
+                return import('https://esm.sh/three@0.165.0/addons/controls/OrbitControls.js?pin=v120');
+              })
+              .then(OrbitControls => {
+                window.OrbitControls = OrbitControls.default || OrbitControls;
                 resolve({ THREE: window.THREE, OrbitControls: window.OrbitControls });
-              } else {
-                // Try importing
-                import('https://esm.sh/three@0.165.0')
-                  .then(THREE => import('https://esm.sh/three@0.165.0/addons/controls/OrbitControls.js')
-                    .then(OrbitControls => resolve({ THREE, OrbitControls }))
-                  )
-                  .catch(reject);
-              }
-            }, 100);
-          }
+              })
+              .catch(reject);
+          };
+
+          // Method 2: Script tags as fallback
+          const tryScripts = () => {
+            return new Promise((resolve, reject) => {
+              const script1 = document.createElement('script');
+              script1.type = 'module';
+              script1.src = 'https://esm.sh/three@0.165.0?pin=v120';
+              const script2 = document.createElement('script');
+              script2.type = 'module';
+              script2.src = 'https://esm.sh/three@0.165.0/addons/controls/OrbitControls.js?pin=v120';
+              
+              let loaded = 0;
+              const check = () => {
+                loaded++;
+                if (loaded === 2) {
+                  setTimeout(() => {
+                    if (window.THREE && window.OrbitControls) {
+                      resolve({ THREE: window.THREE, OrbitControls: window.OrbitControls });
+                    } else {
+                      reject(new Error('Three.js not registered'));
+                    }
+                  }, 50);
+                }
+              };
+              script1.onload = check;
+              script2.onload = check;
+              script1.onerror = () => reject(new Error('Script load failed'));
+              script2.onerror = () => reject(new Error('Script load failed'));
+              document.head.appendChild(script1);
+              document.head.appendChild(script2);
+            });
+          };
+
+          // Try import first, fallback to scripts
+          tryImport().catch(() => tryScripts().catch(reject));
         });
       }
 
-      // Initialize voxel background
-      loadThree().then(({ THREE, OrbitControls }) => {
-        try { initVoxelBackground(THREE, OrbitControls); }
-        catch (e) { console.warn('Voxel background failed:', e); }
-      }).catch(() => {
-        // Three.js failed - canvas stays as fallback colored background
-        console.warn('Three.js unavailable, using fallback background');
-      });
+      loadThree()
+        .then(({ THREE, OrbitControls }) => {
+          threeLoaded = true;
+          try { initVoxelBackground(THREE, OrbitControls); }
+          catch (e) { console.warn('Voxel init failed:', e); }
+        })
+        .catch(() => {
+          console.warn('Three.js unavailable, using fallback background');
+        });
 
       function initVoxelBackground(THREE, OrbitControls) {
-        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' });
+        const renderer = new THREE.WebGLRenderer({ 
+          canvas, 
+          alpha: true, 
+          antialias: true, 
+          powerPreference: 'high-performance',
+          precision: 'highp'
+        });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+        renderer.outputEncoding = THREE.sRGBEncoding;
 
         const scene = new THREE.Scene();
         scene.fog = new THREE.FogExp2(0x050507, 0.015);
@@ -1134,11 +1161,17 @@ if (GLX.usePostProcess) {
         controls.minDistance = 14;
         controls.maxDistance = 30;
 
-        // Block palette
+        // Block palette with proper Minecraft colors
         const BLOCK_COLORS = {
-          grass_top: 0x5dab3d, grass_side: 0x4a8f2f, dirt: 0x8b6b42,
-          stone: 0x6d6d6d, sand: 0xe8d8a8, water: 0x3d8fd8,
-          leaves: 0x3a7d2e, log: 0x5d4028, bedrock: 0x141414,
+          grass_top: 0x5dab3d,
+          grass_side: 0x4a8f2f,
+          dirt: 0x8b6b42,
+          stone: 0x6d6d6d,
+          sand: 0xe8d8a8,
+          water: 0x3d8fd8,
+          leaves: 0x3a7d2e,
+          log: 0x5d4028,
+          bedrock: 0x141414,
         };
 
         const boxGeo = new THREE.BoxGeometry(1, 1, 1);
@@ -1154,7 +1187,7 @@ if (GLX.usePostProcess) {
           return mesh;
         }
 
-        // Fast hash
+        // Fast deterministic hash
         const SEED = 0x9e3779b9;
         function hash(x, z) {
           let h = (x * 374761393) ^ (z * 668265263) ^ SEED;
@@ -1210,10 +1243,9 @@ if (GLX.usePostProcess) {
             }
 
             if (height < WATER_LEVEL) {
-              const key = BLOCK_COLORS.water;
-              if (!positionsByColor[key]) positionsByColor[key] = [];
+              if (!positionsByColor[BLOCK_COLORS.water]) positionsByColor[BLOCK_COLORS.water] = [];
               for (let y = height + 1; y <= WATER_LEVEL; y++) {
-                positionsByColor[key].push(x + 0.5, y + 0.5, z + 0.5);
+                positionsByColor[BLOCK_COLORS.water].push(x + 0.5, y + 0.5, z + 0.5);
               }
             }
 
