@@ -23,13 +23,6 @@
       --card-hover: #14141c;
       --border: #1e1e2a;
       --border-bright: #2a2a3a;
-      --voxel-grass: #5dab3d;
-      --voxel-dirt: #8b6b42;
-      --voxel-stone: #7d7d7d;
-      --voxel-sand: #e8d8a8;
-      --voxel-water: #3d8fd8;
-      --voxel-leaves: #3a7d2e;
-      --voxel-log: #5d4028;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -55,16 +48,13 @@
 
     .mono { font-family: 'JetBrains Mono', monospace; }
 
-    /* Voxel background canvas */
     #voxel-canvas {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
       z-index: -1;
-      opacity: 1;
     }
 
-    /* Skip link for accessibility */
     .skip-link {
       position: absolute;
       top: -100%;
@@ -79,7 +69,6 @@
     }
     .skip-link:focus { top: 1rem; }
 
-    /* Navigation */
     nav {
       position: fixed;
       top: 0; left: 0; right: 0;
@@ -131,7 +120,6 @@
       background: var(--accent-glow);
     }
 
-    /* Hero - full viewport */
     .hero {
       min-height: 100vh;
       display: grid;
@@ -262,7 +250,6 @@
 
     .btn-ghost:hover { color: var(--fg); }
 
-    /* Version pill */
     .version-pill {
       display: inline-flex;
       align-items: center;
@@ -276,14 +263,12 @@
       border-radius: 4px;
     }
 
-    /* Divider */
     .divider {
       height: 1px;
       background: linear-gradient(90deg, transparent, var(--border), transparent);
       margin: 0 2rem;
     }
 
-    /* Sections */
     section {
       padding: 5rem 2rem;
       max-width: 1200px;
@@ -311,7 +296,6 @@
       color: var(--fg);
     }
 
-    /* Presets - voxel card style */
     .presets-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -413,7 +397,6 @@
       line-height: 1.6;
     }
 
-    /* Code blocks - terminal style */
     .code-block {
       background: #08080a;
       border: 1px solid var(--border);
@@ -476,7 +459,6 @@
     .token.boolean { color: #f78c6c; }
     .token.constant { color: #ffcb6b; }
 
-    /* Features */
     .features-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -511,7 +493,6 @@
 
     .feature p { color: var(--fg-dim); font-size: 0.8125rem; line-height: 1.6; }
 
-    /* Performance table */
     .perf-table {
       width: 100%;
       border-collapse: collapse;
@@ -545,7 +526,6 @@
     .perf-table .quality.medium { color: #fbbf24; }
     .perf-table .quality.high { color: #f87171; }
 
-    /* Install steps */
     .install-steps {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -579,7 +559,6 @@
 
     .step h3 { font-size: 1rem; margin-bottom: 1rem; }
 
-    /* Footer */
     footer {
       padding: 3rem 2rem;
       text-align: center;
@@ -626,11 +605,9 @@
     .footer-bottom a { color: var(--accent); text-decoration: none; }
     .footer-bottom a:hover { text-decoration: underline; }
 
-    /* Reveal */
     .reveal { opacity: 0; transform: translateY(20px); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
     .reveal.visible { opacity: 1; transform: translateY(0); }
 
-    /* Responsive */
     @media (max-width: 768px) {
       nav { padding: 0.875rem 1rem; }
       .nav-links { display: none; }
@@ -639,7 +616,6 @@
       .footer-grid { text-align: center; }
     }
 
-    /* Focus visible */
     :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   </style>
 </head>
@@ -662,7 +638,7 @@
       <li><a href="#install">Install</a></li>
     </ul>
     <a href="https://github.com/NT9712/eagler-shaders" class="btn btn-ghost" target="_blank" rel="noopener">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
       GitHub
     </a>
   </nav>
@@ -690,7 +666,6 @@
       </div>
 
       <div class="presets-grid">
-        <!-- Vanilla Enhanced -->
         <article class="preset-card reveal" style="--preset-color: #5dab3d;">
           <div class="preset-header">
             <div class="preset-icon">
@@ -709,7 +684,6 @@
           <p>The default. Better color balance, warmer sunlight, lightweight distance fog, improved sky. Barely any overhead.</p>
         </article>
 
-        <!-- Bright -->
         <article class="preset-card reveal" style="--preset-color: #ffb84d;">
           <div class="preset-header">
             <div class="preset-icon">
@@ -728,7 +702,6 @@
           <p>Brighter lighting, clearer atmosphere, more vibrant colors. No bloom pipeline—just smart color grading and temperature shifts.</p>
         </article>
 
-        <!-- Soft -->
         <article class="preset-card reveal" style="--preset-color: #a78bfa;">
           <div class="preset-header">
             <div class="preset-icon">
@@ -746,7 +719,6 @@
           <p>Gentle transitions, reduced harsh lighting, lifted shadows, subtle atmosphere. Lower contrast, slight desaturation.</p>
         </article>
 
-        <!-- Nightfall -->
         <article class="preset-card reveal" style="--preset-color: #60a5fa;">
           <div class="preset-header">
             <div class="preset-icon">
@@ -765,7 +737,6 @@
           <p>Darker ambient, increased contrast, atmospheric fog, nighttime mood. Dynamic sky color—sunset actually looks like sunset.</p>
         </article>
 
-        <!-- Noir -->
         <article class="preset-card reveal" style="--preset-color: #f472b6;">
           <div class="preset-header">
             <div class="preset-icon">
@@ -783,7 +754,6 @@
           <p>High contrast, near-monochrome, crushed shadows. Strong visual identity through cheap color transforms—no expensive passes.</p>
         </article>
 
-        <!-- Abyss -->
         <article class="preset-card reveal" style="--preset-color: #22d3ee;">
           <div class="preset-header">
             <div class="preset-icon">
@@ -1042,122 +1012,147 @@ if (GLX.usePostProcess) {
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
     // ============================================
-    // VOXEL WORLD BACKGROUND
+    // OPTIMIZED VOXEL BACKGROUND
     // ============================================
     const canvas = document.getElementById('voxel-canvas');
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Cap at 1.5x for performance
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x050507, 0.018);
+    scene.fog = new THREE.FogExp2(0x050507, 0.015);
 
-    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 200);
-    camera.position.set(18, 14, 18);
-    camera.lookAt(0, 2, 0);
+    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 150);
+    camera.position.set(16, 12, 16);
+    camera.lookAt(0, 1, 0);
 
     const controls = new OrbitControls(camera, canvas);
     controls.enableDamping = true;
     controls.enablePan = false;
     controls.enableZoom = false;
     controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.15;
+    controls.autoRotateSpeed = 0.08; // Slower
     controls.dampingFactor = 0.05;
-    controls.minPolarAngle = 0.4;
-    controls.maxPolarAngle = 1.3;
-    controls.minDistance = 15;
-    controls.maxDistance = 35;
+    controls.minPolarAngle = 0.45;
+    controls.maxPolarAngle = 1.25;
+    controls.minDistance = 14;
+    controls.maxDistance = 30;
 
-    // Voxel palette
-    const BLOCKS = {
-      grass:    { color: 0x5dab3d, top: 0x5dab3d, side: 0x8b6b42, bottom: 0x8b6b42 },
-      dirt:     { color: 0x8b6b42, top: 0x8b6b42, side: 0x8b6b42, bottom: 0x8b6b42 },
-      stone:    { color: 0x7d7d7d, top: 0x7d7d7d, side: 0x7d7d7d, bottom: 0x7d7d7d },
-      sand:     { color: 0xe8d8a8, top: 0xe8d8a8, side: 0xe8d8a8, bottom: 0xe8d8a8 },
-      water:    { color: 0x3d8fd8, top: 0x3d8fd8, side: 0x3d8fd8, bottom: 0x3d8fd8 },
-      leaves:   { color: 0x3a7d2e, top: 0x3a7d2e, side: 0x3a7d2e, bottom: 0x3a7d2e },
-      log:      { color: 0x5d4028, top: 0x5d4028, side: 0x5d4028, bottom: 0x5d4028 },
-      bedrock:  { color: 0x1a1a1a, top: 0x1a1a1a, side: 0x1a1a1a, bottom: 0x1a1a1a },
+    // ===== BLOCK PALETTE =====
+    const BLOCK_COLORS = {
+      grass_top:    0x5dab3d,
+      grass_side:   0x4a8f2f,
+      dirt:         0x8b6b42,
+      stone:        0x6d6d6d,
+      sand:         0xe8d8a8,
+      water:        0x3d8fd8,
+      leaves:       0x3a7d2e,
+      log:          0x5d4028,
+      bedrock:      0x141414,
     };
 
-    // Geometry cache
+    // Single box geometry
     const boxGeo = new THREE.BoxGeometry(1, 1, 1);
-    const instancedMeshes = new Map();
+    const meshes = [];
 
-    function getMesh(blockType, count) {
-      if (instancedMeshes.has(blockType)) return instancedMeshes.get(blockType);
-      const mesh = new THREE.InstancedMesh(boxGeo, new THREE.MeshLambertMaterial({ color: blockType.color }), count);
+    function createMesh(color, count) {
+      const mat = new THREE.MeshLambertMaterial({ color, depthWrite: true });
+      const mesh = new THREE.InstancedMesh(boxGeo, mat, count);
       mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-      instancedMeshes.set(blockType, mesh);
+      mesh.frustumCulled = true;
       scene.add(mesh);
+      meshes.push(mesh);
       return mesh;
     }
 
-    // Simple noise for terrain
-    function noise2d(x, z, scale = 0.1, octaves = 3, persistence = 0.5) {
-      let value = 0, amplitude = 1, frequency = scale, max = 0;
-      for (let i = 0; i < octaves; i++) {
-        value += amplitude * Math.sin(x * frequency * 12.9898 + z * frequency * 78.233) * 43758.5453 % 1;
-        max += amplitude;
-        amplitude *= persistence;
-        frequency *= 2;
-      }
-      return value / max;
+    // Fast deterministic hash (no Math.sin in hot path)
+    const SEED = 0x9e3779b9;
+    function hash(x, z) {
+      let h = (x * 374761393) ^ (z * 668265263) ^ SEED;
+      h = (h ^ (h >>> 13)) * 0x5bd1e995;
+      h = (h ^ (h >>> 15)) * 0x5bd1e995;
+      h = h ^ (h >>> 16);
+      return (h >>> 0) / 4294967296;
     }
 
-    // Generate terrain
-    const CHUNK_SIZE = 48;
-    const CHUNK_HALF = CHUNK_SIZE / 2;
-    const blockPositions = [];
+    function noise(x, z, freq) {
+      const xi = Math.floor(x * freq);
+      const zi = Math.floor(z * freq);
+      const xf = x * freq - xi;
+      const zf = z * freq - zi;
+      // Bilinear interpolation of hash
+      const v00 = hash(xi, zi);
+      const v10 = hash(xi + 1, zi);
+      const v01 = hash(xi, zi + 1);
+      const v11 = hash(xi + 1, zi + 1);
+      const u = xf * xf * (3 - 2 * xf);
+      const v = zf * zf * (3 - 2 * zf);
+      return v00 * (1 - u) * (1 - v) + v10 * u * (1 - v) + v01 * (1 - u) * v + v11 * u * v;
+    }
 
-    for (let x = -CHUNK_HALF; x < CHUNK_HALF; x++) {
-      for (let z = -CHUNK_HALF; z < CHUNK_HALF; z++) {
-        // Continental noise
-        const continental = noise2d(x, z, 0.015, 2, 0.5);
-        const hills = noise2d(x, z, 0.05, 3, 0.5) * 0.3;
-        const detail = noise2d(x, z, 0.15, 2, 0.5) * 0.15;
+    // FBM
+    function fbm(x, z) {
+      return noise(x, z, 0.01) * 0.5 +
+             noise(x, z, 0.02) * 0.25 +
+             noise(x, z, 0.04) * 0.125 +
+             noise(x, z, 0.08) * 0.0625;
+    }
 
-        let height = Math.floor((continental + hills + detail) * 18) + 8;
-        height = Math.max(2, Math.min(28, height));
+    // ===== GENERATE TERRAIN ONCE =====
+    const CHUNK = 40; // Smaller chunk
+    const HALF = CHUNK >> 1;
+    const WATER_LEVEL = 8;
+    const positionsByColor = {};
 
-        // Biome noise
-        const biome = noise2d(x * 0.5, z * 0.5, 0.02, 2);
+    // Pre-allocate arrays
+    for (let x = -HALF; x < HALF; x++) {
+      for (let z = -HALF; z < HALF; z++) {
+        const h = fbm(x, z);
+        const biome = noise(x * 0.3, z * 0.3, 0.02);
+        const height = Math.max(2, Math.min(26, Math.floor(h * 16) + 10));
 
         for (let y = 0; y <= height; y++) {
-          let block;
           const depth = height - y;
+          let color;
 
-          if (y === 0) block = BLOCKS.bedrock;
+          if (y === 0) color = BLOCK_COLORS.bedrock;
           else if (depth === 0) {
-            if (biome > 0.3) block = BLOCKS.sand;
-            else block = BLOCKS.grass;
+            if (biome > 0.4) color = BLOCK_COLORS.sand;
+            else color = BLOCK_COLORS.grass_top;
           }
-          else if (depth < 3) block = BLOCKS.dirt;
-          else if (depth < 8) block = BLOCKS.stone;
-          else block = BLOCKS.stone;
+          else if (depth < 3) color = BLOCK_COLORS.dirt;
+          else color = BLOCK_COLORS.stone;
 
-          blockPositions.push({ x: x + 0.5, y: y + 0.5, z: z + 0.5, type: block });
+          const key = color;
+          if (!positionsByColor[key]) positionsByColor[key] = [];
+          positionsByColor[key].push(x + 0.5, y + 0.5, z + 0.5);
         }
 
-        // Water
-        if (height < 8) {
-          for (let y = height + 1; y <= 8; y++) {
-            blockPositions.push({ x: x + 0.5, y: y + 0.5, z: z + 0.5, type: BLOCKS.water });
+        // Water fill
+        if (height < WATER_LEVEL) {
+          const key = BLOCK_COLORS.water;
+          if (!positionsByColor[key]) positionsByColor[key] = [];
+          for (let y = height + 1; y <= WATER_LEVEL; y++) {
+            positionsByColor[key].push(x + 0.5, y + 0.5, z + 0.5);
           }
         }
 
-        // Trees
-        if (height > 8 && depth === 0 && biome < 0.2 && Math.random() < 0.008) {
-          const treeH = 4 + Math.floor(Math.random() * 3);
+        // Trees (sparse)
+        if (depth === 0 && biome < 0.25 && Math.random() < 0.006) {
+          const treeH = 4 + (hash(x + 100, z + 100) * 3) | 0;
+          const logKey = BLOCK_COLORS.log;
+          if (!positionsByColor[logKey]) positionsByColor[logKey] = [];
           for (let ty = 1; ty <= treeH; ty++) {
-            blockPositions.push({ x: x + 0.5, y: height + ty + 0.5, z: z + 0.5, type: BLOCKS.log });
+            positionsByColor[logKey].push(x + 0.5, height + ty + 0.5, z + 0.5);
           }
-          const leafH = treeH - 1;
+          // Leaves - simple box
+          const leafKey = BLOCK_COLORS.leaves;
+          if (!positionsByColor[leafKey]) positionsByColor[leafKey] = [];
           for (let lx = -2; lx <= 2; lx++) {
             for (let lz = -2; lz <= 2; lz++) {
-              for (let ly = leafH; ly <= leafH + 2; ly++) {
-                if (Math.abs(lx) + Math.abs(lz) <= 2 || Math.random() < 0.6) {
-                  blockPositions.push({ x: x + lx + 0.5, y: height + ly + 0.5, z: z + lz + 0.5, type: BLOCKS.leaves });
+              if (Math.abs(lx) + Math.abs(lz) <= 2) {
+                for (let ly = treeH - 1; ly <= treeH + 1; ly++) {
+                  positionsByColor[leafKey].push(x + lx + 0.5, height + ly + 0.5, z + lz + 0.5);
                 }
               }
             }
@@ -1166,76 +1161,70 @@ if (GLX.usePostProcess) {
       }
     }
 
-    // Sort by type for instancing
-    const byType = {};
-    blockPositions.forEach(b => {
-      if (!byType[b.type.color]) byType[b.type.color] = [];
-      byType[b.type.color].push(b);
-    });
-
-    // Create instanced meshes
-    Object.entries(byType).forEach(([color, blocks]) => {
-      const mesh = getMesh({ color: parseInt(color) }, blocks.length);
-      const dummy = new THREE.Object3D();
-      blocks.forEach((b, i) => {
-        dummy.position.set(b.x, b.y, b.z);
+    // ===== CREATE INSTANCED MESHES =====
+    const dummy = new THREE.Object3D();
+    Object.entries(positionsByColor).forEach(([colorStr, positions]) => {
+      const count = positions.length / 3;
+      const mesh = createMesh(parseInt(colorStr), count);
+      for (let i = 0; i < count; i++) {
+        dummy.position.set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
         dummy.updateMatrix();
         mesh.setMatrixAt(i, dummy.matrix);
-      });
+      }
       mesh.instanceMatrix.needsUpdate = true;
-      mesh.count = blocks.length;
     });
 
-    // Lighting
-    const sun = new THREE.DirectionalLight(0xffffee, 1.2);
-    sun.position.set(50, 80, 30);
+    // ===== LIGHTING =====
+    const sun = new THREE.DirectionalLight(0xffffee, 1.1);
+    sun.position.set(40, 60, 25);
     scene.add(sun);
 
-    const fill = new THREE.DirectionalLight(0x4da3ff, 0.4);
-    fill.position.set(-30, 20, -30);
+    const fill = new THREE.DirectionalLight(0x4da3ff, 0.35);
+    fill.position.set(-25, 15, -25);
     scene.add(fill);
 
-    const ambient = new THREE.AmbientLight(0x333344, 0.8);
+    const ambient = new THREE.AmbientLight(0x333344, 0.7);
     scene.add(ambient);
 
-    // Subtle stars
+    // ===== SIMPLE STARS (fewer) =====
     const starGeo = new THREE.BufferGeometry();
-    const starCount = 800;
-    const starPos = new Float32Array(starCount * 3);
-    for (let i = 0; i < starCount; i++) {
-      const r = 80 + Math.random() * 40;
+    const STAR_COUNT = 300;
+    const starPos = new Float32Array(STAR_COUNT * 3);
+    for (let i = 0; i < STAR_COUNT; i++) {
+      const r = 70 + Math.random() * 30;
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
       starPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-      starPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta) + 40;
+      starPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta) + 35;
       starPos[i * 3 + 2] = r * Math.cos(phi);
     }
     starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-    const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.8, transparent: true, opacity: 0.4, sizeAttenuation: true });
+    const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.6, transparent: true, opacity: 0.35, sizeAttenuation: true });
     const stars = new THREE.Points(starGeo, starMat);
     scene.add(stars);
 
-    // Animation
+    // ===== ANIMATION =====
     let time = 0;
     function animate() {
       requestAnimationFrame(animate);
-      time += 0.0008;
+      time += 0.0005; // Slower
 
-      // Day/night cycle (slow)
-      const dayCycle = Math.sin(time * 0.3);
-      sun.intensity = THREE.MathUtils.lerp(0.2, 1.4, (dayCycle + 1) * 0.5);
-      sun.position.y = THREE.MathUtils.lerp(-20, 80, (dayCycle + 1) * 0.5);
-      sun.color.setHSL(0.1, 0.3, THREE.MathUtils.lerp(0.4, 0.95, (dayCycle + 1) * 0.5));
+      // Day/night - very slow
+      const day = Math.sin(time * 0.2);
+      const t = (day + 1) * 0.5;
 
-      fill.intensity = THREE.MathUtils.lerp(0.1, 0.5, (dayCycle + 1) * 0.5);
-      ambient.intensity = THREE.MathUtils.lerp(0.3, 0.8, (dayCycle + 1) * 0.5);
+      sun.intensity = THREE.MathUtils.lerp(0.15, 1.2, t);
+      sun.position.y = THREE.MathUtils.lerp(-15, 70, t);
+      sun.color.setHSL(0.1, 0.25, THREE.MathUtils.lerp(0.35, 0.95, t));
 
-      // Fog color shift
-      const fogColor = new THREE.Color();
-      fogColor.setHSL(0.58, 0.15, THREE.MathUtils.lerp(0.04, 0.18, (dayCycle + 1) * 0.5));
-      scene.fog.color = fogColor;
+      fill.intensity = THREE.MathUtils.lerp(0.1, 0.4, t);
+      ambient.intensity = THREE.MathUtils.lerp(0.25, 0.7, t);
 
-      stars.rotation.y += 0.00002;
+      const fogC = new THREE.Color();
+      fogC.setHSL(0.58, 0.12, THREE.MathUtils.lerp(0.03, 0.15, t));
+      scene.fog.color = fogC;
+
+      stars.rotation.y += 0.000015;
 
       controls.update();
       renderer.render(scene, camera);
@@ -1274,7 +1263,7 @@ if (GLX.usePostProcess) {
       });
     });
 
-    // Nav active state on scroll
+    // Nav active state
     const sections = document.querySelectorAll('section[id]');
     const navLinks = document.querySelectorAll('.nav-links a');
     window.addEventListener('scroll', () => {
