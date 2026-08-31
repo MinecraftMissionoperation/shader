@@ -53,6 +53,7 @@
       top: 0; left: 0;
       width: 100%; height: 100%;
       z-index: -1;
+      background: var(--bg); /* Fallback */
     }
 
     .skip-link {
@@ -999,283 +1000,330 @@ if (GLX.usePostProcess) {
     </div>
   </footer>
 
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://esm.sh/three@0.165.0",
-      "three/addons/": "https://esm.sh/three@0.165.0/addons/"
-    }
-  }
-  </script>
-  <script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
+  <script>
     // ============================================
-    // OPTIMIZED VOXEL BACKGROUND
+    // INIT ALL FEATURES INDEPENDENTLY - NO DEPENDENCIES
     // ============================================
-    const canvas = document.getElementById('voxel-canvas');
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Cap at 1.5x for performance
 
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x050507, 0.015);
+    // 1. COPY BUTTONS - runs immediately
+    (function() {
+      document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const pre = this.closest('.code-block')?.querySelector('pre');
+          if (!pre) return;
+          const text = pre.innerText;
+          navigator.clipboard.writeText(text).then(() => {
+            const original = this.textContent;
+            this.textContent = 'Copied';
+            this.classList.add('copied');
+            setTimeout(() => { this.textContent = original; this.classList.remove('copied'); }, 1800);
+          }).catch(() => {});
+        });
+      });
+    })();
 
-    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 150);
-    camera.position.set(16, 12, 16);
-    camera.lookAt(0, 1, 0);
-
-    const controls = new OrbitControls(camera, canvas);
-    controls.enableDamping = true;
-    controls.enablePan = false;
-    controls.enableZoom = false;
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.08; // Slower
-    controls.dampingFactor = 0.05;
-    controls.minPolarAngle = 0.45;
-    controls.maxPolarAngle = 1.25;
-    controls.minDistance = 14;
-    controls.maxDistance = 30;
-
-    // ===== BLOCK PALETTE =====
-    const BLOCK_COLORS = {
-      grass_top:    0x5dab3d,
-      grass_side:   0x4a8f2f,
-      dirt:         0x8b6b42,
-      stone:        0x6d6d6d,
-      sand:         0xe8d8a8,
-      water:        0x3d8fd8,
-      leaves:       0x3a7d2e,
-      log:          0x5d4028,
-      bedrock:      0x141414,
-    };
-
-    // Single box geometry
-    const boxGeo = new THREE.BoxGeometry(1, 1, 1);
-    const meshes = [];
-
-    function createMesh(color, count) {
-      const mat = new THREE.MeshLambertMaterial({ color, depthWrite: true });
-      const mesh = new THREE.InstancedMesh(boxGeo, mat, count);
-      mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-      mesh.frustumCulled = true;
-      scene.add(mesh);
-      meshes.push(mesh);
-      return mesh;
-    }
-
-    // Fast deterministic hash (no Math.sin in hot path)
-    const SEED = 0x9e3779b9;
-    function hash(x, z) {
-      let h = (x * 374761393) ^ (z * 668265263) ^ SEED;
-      h = (h ^ (h >>> 13)) * 0x5bd1e995;
-      h = (h ^ (h >>> 15)) * 0x5bd1e995;
-      h = h ^ (h >>> 16);
-      return (h >>> 0) / 4294967296;
-    }
-
-    function noise(x, z, freq) {
-      const xi = Math.floor(x * freq);
-      const zi = Math.floor(z * freq);
-      const xf = x * freq - xi;
-      const zf = z * freq - zi;
-      // Bilinear interpolation of hash
-      const v00 = hash(xi, zi);
-      const v10 = hash(xi + 1, zi);
-      const v01 = hash(xi, zi + 1);
-      const v11 = hash(xi + 1, zi + 1);
-      const u = xf * xf * (3 - 2 * xf);
-      const v = zf * zf * (3 - 2 * zf);
-      return v00 * (1 - u) * (1 - v) + v10 * u * (1 - v) + v01 * (1 - u) * v + v11 * u * v;
-    }
-
-    // FBM
-    function fbm(x, z) {
-      return noise(x, z, 0.01) * 0.5 +
-             noise(x, z, 0.02) * 0.25 +
-             noise(x, z, 0.04) * 0.125 +
-             noise(x, z, 0.08) * 0.0625;
-    }
-
-    // ===== GENERATE TERRAIN ONCE =====
-    const CHUNK = 40; // Smaller chunk
-    const HALF = CHUNK >> 1;
-    const WATER_LEVEL = 8;
-    const positionsByColor = {};
-
-    // Pre-allocate arrays
-    for (let x = -HALF; x < HALF; x++) {
-      for (let z = -HALF; z < HALF; z++) {
-        const h = fbm(x, z);
-        const biome = noise(x * 0.3, z * 0.3, 0.02);
-        const height = Math.max(2, Math.min(26, Math.floor(h * 16) + 10));
-
-        for (let y = 0; y <= height; y++) {
-          const depth = height - y;
-          let color;
-
-          if (y === 0) color = BLOCK_COLORS.bedrock;
-          else if (depth === 0) {
-            if (biome > 0.4) color = BLOCK_COLORS.sand;
-            else color = BLOCK_COLORS.grass_top;
+    // 2. SCROLL REVEAL - runs independently
+    (function() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
           }
-          else if (depth < 3) color = BLOCK_COLORS.dirt;
-          else color = BLOCK_COLORS.stone;
+        });
+      }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
 
-          const key = color;
-          if (!positionsByColor[key]) positionsByColor[key] = [];
-          positionsByColor[key].push(x + 0.5, y + 0.5, z + 0.5);
+      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    })();
+
+    // 3. NAV ACTIVE STATE - runs independently
+    (function() {
+      const sections = document.querySelectorAll('section[id]');
+      const navLinks = document.querySelectorAll('.nav-links a');
+      if (!sections.length || !navLinks.length) return;
+
+      window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+          const top = section.offsetTop - 120;
+          if (scrollY >= top) current = section.getAttribute('id');
+        });
+        navLinks.forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+        });
+      }, { passive: true });
+    })();
+
+    // 4. THREE.JS BACKGROUND - isolated, won't break other features
+    (function() {
+      const canvas = document.getElementById('voxel-canvas');
+      if (!canvas) return;
+
+      // Load Three.js dynamically with error handling
+      function loadThree() {
+        return new Promise((resolve, reject) => {
+          // Check if already loaded
+          if (window.THREE && window.OrbitControls) {
+            resolve({ THREE: window.THREE, OrbitControls: window.OrbitControls });
+            return;
+          }
+
+          // Load via script tags (more reliable than importmap)
+          const scripts = [
+            'https://esm.sh/three@0.165.0',
+            'https://esm.sh/three@0.165.0/addons/controls/OrbitControls.js'
+          ];
+
+          let loaded = 0;
+          scripts.forEach(src => {
+            const script = document.createElement('script');
+            script.type = 'module';
+            script.src = src;
+            script.onload = () => { loaded++; if (loaded === scripts.length) checkReady(); };
+            script.onerror = () => reject(new Error('Failed to load ' + src));
+            document.head.appendChild(script);
+          });
+
+          function checkReady() {
+            // Wait a tick for modules to register
+            setTimeout(() => {
+              if (window.THREE && window.OrbitControls) {
+                resolve({ THREE: window.THREE, OrbitControls: window.OrbitControls });
+              } else {
+                // Try importing
+                import('https://esm.sh/three@0.165.0')
+                  .then(THREE => import('https://esm.sh/three@0.165.0/addons/controls/OrbitControls.js')
+                    .then(OrbitControls => resolve({ THREE, OrbitControls }))
+                  )
+                  .catch(reject);
+              }
+            }, 100);
+          }
+        });
+      }
+
+      // Initialize voxel background
+      loadThree().then(({ THREE, OrbitControls }) => {
+        try { initVoxelBackground(THREE, OrbitControls); }
+        catch (e) { console.warn('Voxel background failed:', e); }
+      }).catch(() => {
+        // Three.js failed - canvas stays as fallback colored background
+        console.warn('Three.js unavailable, using fallback background');
+      });
+
+      function initVoxelBackground(THREE, OrbitControls) {
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x050507, 0.015);
+
+        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 150);
+        camera.position.set(16, 12, 16);
+        camera.lookAt(0, 1, 0);
+
+        const controls = new OrbitControls(camera, canvas);
+        controls.enableDamping = true;
+        controls.enablePan = false;
+        controls.enableZoom = false;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.08;
+        controls.dampingFactor = 0.05;
+        controls.minPolarAngle = 0.45;
+        controls.maxPolarAngle = 1.25;
+        controls.minDistance = 14;
+        controls.maxDistance = 30;
+
+        // Block palette
+        const BLOCK_COLORS = {
+          grass_top: 0x5dab3d, grass_side: 0x4a8f2f, dirt: 0x8b6b42,
+          stone: 0x6d6d6d, sand: 0xe8d8a8, water: 0x3d8fd8,
+          leaves: 0x3a7d2e, log: 0x5d4028, bedrock: 0x141414,
+        };
+
+        const boxGeo = new THREE.BoxGeometry(1, 1, 1);
+        const meshes = [];
+
+        function createMesh(color, count) {
+          const mat = new THREE.MeshLambertMaterial({ color, depthWrite: true });
+          const mesh = new THREE.InstancedMesh(boxGeo, mat, count);
+          mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+          mesh.frustumCulled = true;
+          scene.add(mesh);
+          meshes.push(mesh);
+          return mesh;
         }
 
-        // Water fill
-        if (height < WATER_LEVEL) {
-          const key = BLOCK_COLORS.water;
-          if (!positionsByColor[key]) positionsByColor[key] = [];
-          for (let y = height + 1; y <= WATER_LEVEL; y++) {
-            positionsByColor[key].push(x + 0.5, y + 0.5, z + 0.5);
-          }
+        // Fast hash
+        const SEED = 0x9e3779b9;
+        function hash(x, z) {
+          let h = (x * 374761393) ^ (z * 668265263) ^ SEED;
+          h = (h ^ (h >>> 13)) * 0x5bd1e995;
+          h = (h ^ (h >>> 15)) * 0x5bd1e995;
+          h = h ^ (h >>> 16);
+          return (h >>> 0) / 4294967296;
         }
 
-        // Trees (sparse)
-        if (depth === 0 && biome < 0.25 && Math.random() < 0.006) {
-          const treeH = 4 + (hash(x + 100, z + 100) * 3) | 0;
-          const logKey = BLOCK_COLORS.log;
-          if (!positionsByColor[logKey]) positionsByColor[logKey] = [];
-          for (let ty = 1; ty <= treeH; ty++) {
-            positionsByColor[logKey].push(x + 0.5, height + ty + 0.5, z + 0.5);
-          }
-          // Leaves - simple box
-          const leafKey = BLOCK_COLORS.leaves;
-          if (!positionsByColor[leafKey]) positionsByColor[leafKey] = [];
-          for (let lx = -2; lx <= 2; lx++) {
-            for (let lz = -2; lz <= 2; lz++) {
-              if (Math.abs(lx) + Math.abs(lz) <= 2) {
-                for (let ly = treeH - 1; ly <= treeH + 1; ly++) {
-                  positionsByColor[leafKey].push(x + lx + 0.5, height + ly + 0.5, z + lz + 0.5);
+        function noise(x, z, freq) {
+          const xi = Math.floor(x * freq);
+          const zi = Math.floor(z * freq);
+          const xf = x * freq - xi;
+          const zf = z * freq - zi;
+          const v00 = hash(xi, zi);
+          const v10 = hash(xi + 1, zi);
+          const v01 = hash(xi, zi + 1);
+          const v11 = hash(xi + 1, zi + 1);
+          const u = xf * xf * (3 - 2 * xf);
+          const v = zf * zf * (3 - 2 * zf);
+          return v00 * (1 - u) * (1 - v) + v10 * u * (1 - v) + v01 * (1 - u) * v + v11 * u * v;
+        }
+
+        function fbm(x, z) {
+          return noise(x, z, 0.01) * 0.5 +
+                 noise(x, z, 0.02) * 0.25 +
+                 noise(x, z, 0.04) * 0.125 +
+                 noise(x, z, 0.08) * 0.0625;
+        }
+
+        // Generate terrain
+        const CHUNK = 40;
+        const HALF = CHUNK >> 1;
+        const WATER_LEVEL = 8;
+        const positionsByColor = {};
+
+        for (let x = -HALF; x < HALF; x++) {
+          for (let z = -HALF; z < HALF; z++) {
+            const h = fbm(x, z);
+            const biome = noise(x * 0.3, z * 0.3, 0.02);
+            const height = Math.max(2, Math.min(26, Math.floor(h * 16) + 10));
+
+            for (let y = 0; y <= height; y++) {
+              const depth = height - y;
+              let color;
+              if (y === 0) color = BLOCK_COLORS.bedrock;
+              else if (depth === 0) color = biome > 0.4 ? BLOCK_COLORS.sand : BLOCK_COLORS.grass_top;
+              else if (depth < 3) color = BLOCK_COLORS.dirt;
+              else color = BLOCK_COLORS.stone;
+
+              if (!positionsByColor[color]) positionsByColor[color] = [];
+              positionsByColor[color].push(x + 0.5, y + 0.5, z + 0.5);
+            }
+
+            if (height < WATER_LEVEL) {
+              const key = BLOCK_COLORS.water;
+              if (!positionsByColor[key]) positionsByColor[key] = [];
+              for (let y = height + 1; y <= WATER_LEVEL; y++) {
+                positionsByColor[key].push(x + 0.5, y + 0.5, z + 0.5);
+              }
+            }
+
+            // Trees
+            if (height > 8 && biome < 0.25 && Math.random() < 0.006) {
+              const treeH = 4 + (hash(x + 100, z + 100) * 3) | 0;
+              if (!positionsByColor[BLOCK_COLORS.log]) positionsByColor[BLOCK_COLORS.log] = [];
+              for (let ty = 1; ty <= treeH; ty++) {
+                positionsByColor[BLOCK_COLORS.log].push(x + 0.5, height + ty + 0.5, z + 0.5);
+              }
+              if (!positionsByColor[BLOCK_COLORS.leaves]) positionsByColor[BLOCK_COLORS.leaves] = [];
+              for (let lx = -2; lx <= 2; lx++) {
+                for (let lz = -2; lz <= 2; lz++) {
+                  if (Math.abs(lx) + Math.abs(lz) <= 2) {
+                    for (let ly = treeH - 1; ly <= treeH + 1; ly++) {
+                      positionsByColor[BLOCK_COLORS.leaves].push(x + lx + 0.5, height + ly + 0.5, z + lz + 0.5);
+                    }
+                  }
                 }
               }
             }
           }
         }
-      }
-    }
 
-    // ===== CREATE INSTANCED MESHES =====
-    const dummy = new THREE.Object3D();
-    Object.entries(positionsByColor).forEach(([colorStr, positions]) => {
-      const count = positions.length / 3;
-      const mesh = createMesh(parseInt(colorStr), count);
-      for (let i = 0; i < count; i++) {
-        dummy.position.set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
-        dummy.updateMatrix();
-        mesh.setMatrixAt(i, dummy.matrix);
-      }
-      mesh.instanceMatrix.needsUpdate = true;
-    });
-
-    // ===== LIGHTING =====
-    const sun = new THREE.DirectionalLight(0xffffee, 1.1);
-    sun.position.set(40, 60, 25);
-    scene.add(sun);
-
-    const fill = new THREE.DirectionalLight(0x4da3ff, 0.35);
-    fill.position.set(-25, 15, -25);
-    scene.add(fill);
-
-    const ambient = new THREE.AmbientLight(0x333344, 0.7);
-    scene.add(ambient);
-
-    // ===== SIMPLE STARS (fewer) =====
-    const starGeo = new THREE.BufferGeometry();
-    const STAR_COUNT = 300;
-    const starPos = new Float32Array(STAR_COUNT * 3);
-    for (let i = 0; i < STAR_COUNT; i++) {
-      const r = 70 + Math.random() * 30;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      starPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-      starPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta) + 35;
-      starPos[i * 3 + 2] = r * Math.cos(phi);
-    }
-    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-    const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.6, transparent: true, opacity: 0.35, sizeAttenuation: true });
-    const stars = new THREE.Points(starGeo, starMat);
-    scene.add(stars);
-
-    // ===== ANIMATION =====
-    let time = 0;
-    function animate() {
-      requestAnimationFrame(animate);
-      time += 0.0005; // Slower
-
-      // Day/night - very slow
-      const day = Math.sin(time * 0.2);
-      const t = (day + 1) * 0.5;
-
-      sun.intensity = THREE.MathUtils.lerp(0.15, 1.2, t);
-      sun.position.y = THREE.MathUtils.lerp(-15, 70, t);
-      sun.color.setHSL(0.1, 0.25, THREE.MathUtils.lerp(0.35, 0.95, t));
-
-      fill.intensity = THREE.MathUtils.lerp(0.1, 0.4, t);
-      ambient.intensity = THREE.MathUtils.lerp(0.25, 0.7, t);
-
-      const fogC = new THREE.Color();
-      fogC.setHSL(0.58, 0.12, THREE.MathUtils.lerp(0.03, 0.15, t));
-      scene.fog.color = fogC;
-
-      stars.rotation.y += 0.000015;
-
-      controls.update();
-      renderer.render(scene, camera);
-    }
-    animate();
-
-    // Resize
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    // Scroll reveal
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
-    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
-
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-    // Copy buttons
-    document.querySelectorAll('.copy-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const pre = btn.closest('.code-block').querySelector('pre');
-        const text = pre.innerText;
-        navigator.clipboard.writeText(text).then(() => {
-          const original = btn.textContent;
-          btn.textContent = 'Copied';
-          btn.classList.add('copied');
-          setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 1800);
+        // Create instanced meshes
+        const dummy = new THREE.Object3D();
+        Object.entries(positionsByColor).forEach(([colorStr, positions]) => {
+          const count = positions.length / 3;
+          const mesh = createMesh(parseInt(colorStr), count);
+          for (let i = 0; i < count; i++) {
+            dummy.position.set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
+            dummy.updateMatrix();
+            mesh.setMatrixAt(i, dummy.matrix);
+          }
+          mesh.instanceMatrix.needsUpdate = true;
         });
-      });
-    });
 
-    // Nav active state
-    const sections = document.querySelectorAll('section[id]');
-    const navLinks = document.querySelectorAll('.nav-links a');
-    window.addEventListener('scroll', () => {
-      let current = '';
-      sections.forEach(section => {
-        const top = section.offsetTop - 120;
-        if (scrollY >= top) current = section.getAttribute('id');
-      });
-      navLinks.forEach(link => {
-        link.classList.toggle('active', link.getAttribute('href') === '#' + current);
-      });
-    });
+        function createMesh(color, count) {
+          const mat = new THREE.MeshLambertMaterial({ color, depthWrite: true });
+          const mesh = new THREE.InstancedMesh(boxGeo, mat, count);
+          mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+          mesh.frustumCulled = true;
+          scene.add(mesh);
+          meshes.push(mesh);
+          return mesh;
+        }
+
+        // Lighting
+        const sun = new THREE.DirectionalLight(0xffffee, 1.1);
+        sun.position.set(40, 60, 25);
+        scene.add(sun);
+
+        const fill = new THREE.DirectionalLight(0x4da3ff, 0.35);
+        fill.position.set(-25, 15, -25);
+        scene.add(fill);
+
+        const ambient = new THREE.AmbientLight(0x333344, 0.7);
+        scene.add(ambient);
+
+        // Stars
+        const starGeo = new THREE.BufferGeometry();
+        const STAR_COUNT = 300;
+        const starPos = new Float32Array(STAR_COUNT * 3);
+        for (let i = 0; i < STAR_COUNT; i++) {
+          const r = 70 + Math.random() * 30;
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.acos(2 * Math.random() - 1);
+          starPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+          starPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta) + 35;
+          starPos[i * 3 + 2] = r * Math.cos(phi);
+        }
+        starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+        const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.6, transparent: true, opacity: 0.35, sizeAttenuation: true });
+        const stars = new THREE.Points(starGeo, starMat);
+        scene.add(stars);
+
+        // Animation
+        let time = 0;
+        function animate() {
+          requestAnimationFrame(animate);
+          time += 0.0005;
+
+          const day = Math.sin(time * 0.2);
+          const t = (day + 1) * 0.5;
+
+          sun.intensity = THREE.MathUtils.lerp(0.15, 1.2, t);
+          sun.position.y = THREE.MathUtils.lerp(-15, 70, t);
+          sun.color.setHSL(0.1, 0.25, THREE.MathUtils.lerp(0.35, 0.95, t));
+
+          fill.intensity = THREE.MathUtils.lerp(0.1, 0.4, t);
+          ambient.intensity = THREE.MathUtils.lerp(0.25, 0.7, t);
+
+          const fogC = new THREE.Color();
+          fogC.setHSL(0.58, 0.12, THREE.MathUtils.lerp(0.03, 0.15, t));
+          scene.fog.color = fogC;
+
+          stars.rotation.y += 0.000015;
+
+          controls.update();
+          renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+      }
+    })();
   </script>
 </body>
 </html>
